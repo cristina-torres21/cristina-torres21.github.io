@@ -1,0 +1,14 @@
+---
+title: Python Stuff
+author: ''
+date: '2021-05-09'
+slug: python-stuff
+categories: []
+tags: []
+description: ''
+---
+Here's my blog about Python:
+
+```{r}
+#insert code here
+```

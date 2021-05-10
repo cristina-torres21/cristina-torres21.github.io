@@ -1,0 +1,292 @@
+---
+title: 'Project 1: Exploratory Data Analysis over Malaria'
+author: "Cristina Torres"
+date: '04/04/21'
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+# Incidence/Death rate of Malaria and the Percentage of Households with at least one ITN for sleeping based on Government Spending from 2006-2011
+
+## Introduction
+I am currently enrolled in a Global Health studies class and one disease that continues to be relevant in our discussion is the prevalence of Malaria. One thing that I was not aware of before this class is that families in underdeveloped worlds cover their households with nets, more specifically, Insecticide-treated bed nets (ITN). Provided through government spending, these nets have been shown to greatly reduce the number of malaria illness, severe disease, and death due to malaria. 
+
+In this project, I would like to further understand the correlation between the percentage of households who have ITN and their incidence and death rates of Malaria. I have pulled data from "Our World in Data". The three data sets are: "Number of Malaria cases per 100,000", "Percentage of households with at least one ITN for sleeping", and "Number of deaths from Malaria".(https://ourworldindata.org/grapher/number-of-malaria-cases-per-100000-individuals, https://ourworldindata.org/grapher/households-with-at-least-one-itn and https://ourworldindata.org/grapher/malaria-deaths-ihme?tab=chart, respectively) The first data set lists the entity (country), code, year, and incidence of Malaria per 100,000. The second data set lists the entity, code, year and the percentage of households with at least one ITN for sleeping. The third data set lists the entity, code, year and the number of deaths.
+
+In addition, since many ITNs are provided through government spending, I would like to see if there is correlation in the amount of government spending with the incidence of Malaria and the rate of death due to Malaria. The data set,"Government Spending", was also found through "Our World in Data" (https://ourworldindata.org/grapher/historical-gov-spending-gdp). This data set lists the entity, code, year, and the amount of government spending. 
+
+  I hypothesize that if government spends more money, the more amount of ITN available, and the lower the incidence and death from Malaria. 
+
+### Reading in the four data sets:
+```{r}
+library(tidyverse)
+
+ITN <- read_csv("households-with-at-least-one-itn.csv")
+glimpse(ITN)
+
+incidence <- read_csv("number-of-malaria-cases-per-100000-individuals (1).csv")
+glimpse(incidence)
+
+malaria_deaths <- read_csv("malaria-deaths-ihme.csv")
+glimpse(malaria_deaths)
+
+govt_spend <- read_csv("historical-gov-spending-gdp.csv")
+glimpse(govt_spend)
+```
+
+### Part 1 - Tidying Data: 
+Since the data is already tidy, the following code blocks demonstrate the ability to untidy and retidy two out of the four data sets. 
+
+*Percentage of ITN in Households Data set:*
+```{r}
+glimpse(ITN)
+ITN_untidy <- ITN %>% pivot_wider(names_from = "Year", values_from = "Entity")
+glimpse(ITN_untidy)
+ITN_retidy <- ITN_untidy %>% pivot_longer(cols = 3:13, names_to = "Year", values_to ="Entity") %>% na.omit()
+glimpse(ITN_retidy)
+```
+
+*Incidence of Malaria per 100,000 Data set:*
+```{r}
+incidence
+incidence_untidy <- incidence %>% pivot_wider(names_from = "Code", values_from= "Malaria cases/100,000 pop. - wef_cm")
+incidence_untidy
+incidence_retidy <- incidence_untidy %>% pivot_longer(cols = 3:146, names_to ="Code", values_to= "Malaria cases per 100,000") %>% na.omit()
+incidence_retidy
+```
+
+### Part 2 - Joining Data 
+Since the four datasets all have in common the Entity (country) and Code, I decided to use that as my commmon ID. I began with creating a dataset that shows the deaths and incidence of Malaria using full_join(). I began with this since I wanted to ensure that in any given year that there was reported for incidence of Malaria, there was also reported deaths from Malaria. Using na.omit(), I was able to omit any years for which the two data sets did not have in common or did not have both variables accounted for.
+```{r}
+#tidying/merging datasets
+death_incidence <- malaria_deaths %>% full_join(incidence) %>% na.omit()
+death_incidence
+```
+
+Next, I determined in which observations was there ITN reported for that same year using right_join(). I used right_join in this dataset since I wanted to add the percentage of ITN noted for each year and the incidence and death rates that correlated to the percentage of ITN.
+
+```{r}
+ITN_DI <-death_incidence %>% right_join(ITN)%>% na.omit()
+glimpse(ITN_DI)
+```
+
+Finally I joined all four data sets by left_join() with the governemnt expenditures data set so I could see which observations there was government spending. The final data set (malaria_full) shows the incidence per 100,000 and the number of deaths from Malaria when there is ITN and Government spending present. As previously mentioned, I used na.omit() to omit any observation wherein the four variables (incidence, death, ITN, and government spending) were missing a value, as well as to omit the years in which no values were observed for all four variables. (It should also be noted that after joining these datasets I was left with the range of years from 2006-2011)
+
+```{r}
+malaria_full <- ITN_DI %>% left_join(govt_spend) %>% na.omit()
+glimpse(malaria_full)
+```
+
+```{r}
+#renaming colums to make it easier to read
+malaria_full <- malaria_full %>% rename("Government Expenditure" = "Government Expenditure (IMF based on Mauro et al. (2015))")
+malaria_full <- malaria_full %>% rename("% ITN" = "Indicator:Households with at least one ITN for sleeping (%)")
+malaria_full <- malaria_full %>% rename("Malaria cases/100,000" = "Malaria cases/100,000 pop. - wef_cm")
+malaria_full <- malaria_full %>% rename("ITN" = "% ITN")
+
+```
+
+### Part 3 - Summary Statistics 
+Since the code of the country is not technically needed in my project, I decided to drop it by using select. 
+```{r}
+malaria_data <- malaria_full %>% select(-Code)
+```
+
+In addition, I wanted to determine out of the remaining 31 observations how many countries and years existed in my data set. Which was 24 countries and 6 different years.
+```{r}
+malaria_data %>% summarise(n_distinct(Entity))
+malaria_data %>% summarise(n_distinct(Year))
+```
+After finding the distinct number of countries that existed in my data set, I decided to do some research to determine which countries accounted for most of the malaria cases and deaths. 
+
+According to the World Health Organization, six countries account for approximately half of all malaria deaths worldwide: Nigeria, Congo, Tanzania, Burkina Faso, Mozambique and Niger, which are all located on the African continent
+
+Using filter(), I was able to see the observations in my data set that accounted for the countries that held the most deaths due to Malaria. I found that only 4 out of the top 6 were included in my data set. I named this new observation "top4". 
+```{r}
+top4 <- malaria_data %>% filter(Entity %in% c("Nigeria","Congo","Tanzania","Burkina Faso","Mozambique","Niger"))
+top4
+```
+Since I am looking for correlation between the number of cases and the number of deaths of Malaria based on the amount of ITN and government spending, I wanted to determine the percentage of households with ITN and the amount of money government spent.
+
+After accounting for the top four countries that were included in my data, I arranged these countries based on descending percentage of household with ITN to look at the incidence and deaths due to Malaria. Then I arranged these countries based on ascending government expenditures. I noted that after these arrangements I did not see much correlation between my variables within the top four countries. 
+
+```{r}
+top4 %>% arrange(-ITN)
+top4 %>% arrange(`Government Expenditure`)
+```
+
+I did the same process for the my full data set, and did not see much correlation between the amount of government expenditures and percentage of ITN and the rate of Malaria incidence/death. 
+
+```{r}
+malaria_data %>% arrange(-ITN)
+malaria_data %>% arrange(`Government Expenditure`)
+```
+
+After trying to see if I could find any correlation between my variables, I decided to
+determine the overall average number of deaths and incidence per 100,000 in each year included in my data set.
+
+I grouped the malaria data set by year and summarized the average number of deaths and incidence. From this I saw that the greatest average of deaths due to Malaria were in 2007 and the greatest average of incidence per 100,000 was in 2011.
+
+With my hypothesis in mind, I wanted to see which year was when the government spent the least amount of money and the most amount of money (2009,2010). As well as which years had the lowest and highest percentage of ITN (2006, 2011).
+
+```{r}
+#one at a time 
+malaria_data %>% group_by(Entity, Year) %>% summarise(mean_death=mean(Deaths)) %>% arrange(mean_death)
+
+malaria_data %>% group_by(Entity, Year) %>% summarise(mean_incidence = mean(`Malaria cases/100,000`)) %>% arrange(mean_incidence)
+
+malaria_data %>% group_by(Entity, Year) %>% summarise(mean_spent = mean(`Government Expenditure`)) %>% arrange(mean_spent)
+
+malaria_data %>% group_by(Entity, Year) %>% summarise(mean_nets = mean(`ITN`)) %>% arrange(mean_nets)
+
+#all together 
+malaria_data %>% group_by(Entity, Year) %>% summarize_if(is.numeric, list(mean=mean), na.rm=T)
+
+```
+
+Next, I wanted to determine the Mortality rate of Malaria. I used the Mortality equation (Mortality = (# Deaths/ Total population)*100). In order to find the Mortality rate, I had to gather data that included the populations of my observations.
+
+I used the population data set from "Our World in Data" (https://ourworldindata.org/world-population-growth). I used left_join() to only include the populations that were observed in my full malaria data set. Then using mutate(), I was able to create a new column that determined the Mortality rate for each of my observations. I named this finding "all_malaria". 
+
+I was also curious to see which country, during which year, had the largest Mortality rate so I used arrange() for the variable and discovered that Burkina Faso (one of the top six) had the largest Mortality rate, which was in 2006.
+```{r}
+#using mutate()
+global_pop <- read_csv("population.csv")
+
+pop_malaria <- malaria_data %>% left_join(global_pop)
+
+all_malaria <- pop_malaria %>% mutate(Mortality=(`Deaths`/`Total population`)*100) %>% select(-Code)
+
+all_malaria %>% arrange(-Mortality)
+```
+
+The following code chunk is the summary statistics for my numeric variables. I was able to determine the standard deviation, variance, quantiles, minimum and maximum.
+```{r}
+#standard devation - 
+all_malaria %>% group_by(Year) %>% summarise_if(is.numeric, list(sd=sd), na.rm=T)
+
+#variance - 
+all_malaria %>% group_by(Year) %>% summarise_if(is.numeric, list(var=var), na.rm=T)
+
+#quantile -
+all_malaria %>% summarize_if(is.numeric, list(Q1=quantile), probs=.25, na.rm=T)
+all_malaria %>% summarize_if(is.numeric, list(Q2=quantile), probs=.5, na.rm=T)
+all_malaria %>% summarize_if(is.numeric, list(Q3=quantile), probs=.75, na.rm=T)
+all_malaria %>% summarize_if(is.numeric, list(Q4=quantile), probs=1, na.rm=T)
+
+
+#min & max
+min_malaria <- all_malaria %>% summarize_if(is.numeric, list(min=min), na.rm=T)
+min_malaria %>% pivot_longer(cols = 2:7, names_to = "Statistic", values_to ="Value")
+
+max_malaria <- all_malaria %>% summarize_if(is.numeric, list(max=max), na.rm=T)
+max_malaria %>% pivot_longer(cols = 2:7, names_to = "Statistic", values_to="Value")
+```
+
+After accounting for summary statistics, I determined the correlation between my numeric variables using `cor(use="pair")
+```{r}
+#cor -
+cor_malaria <- malaria_data %>% select(-Year) %>% select_if(is.numeric) %>% cor(use="pair")
+```
+From my correlation matrix, I saw that there was little correlation between my variables. 
+
+### Part 4 - Data Visualizations (three plots)
+
+After looking at the numbers and statistics from my data set and seeing little correlation, I decided to make a correlation matrix as well as a heat map to better visualize the correlation, if any, between my numeric variables. 
+
+```{r}
+cor_malaria %>% round(4)
+cor_malaria %>% as.data.frame()
+tidy_cor_malaria <- cor_malaria %>% as.data.frame() %>% rownames_to_column("var1") %>% pivot_longer(-1, names_to = "var2", values_to = "correlation")
+tidy_cor_malaria
+
+tidy_cor_malaria %>% ggplot(aes(var1, var2, fill = correlation)) + geom_tile()+
+scale_fill_gradient2(low="red",mid="white",high="blue")+ #makes colors!
+geom_text(aes(label=round(correlation,2)),color = "black", size = 4)+ #overlays correlation values
+theme(axis.text.x = element_text(angle = 90, hjust = 1))+ #flips the x-axis labels
+coord_fixed()
+
+```
+The heat map shows little correlation between my variables in the large data set. 
+
+
+```{r}
+ggplot(malaria_data, aes(ITN, `Malaria cases/100,000`)) + geom_point(aes(color = Entity))+ labs(x = "Percentage of Households with ITN", y = "Incidence of Malaria per 100,000", title = "Incidence of Malaria and % of ITN based on Country") + 
+    labs(colour = "Country")
+```
+I graphed the relationship between incidence of malaria and the percentage of households with ITN based on respective Countries. 
+
+I used ggplot() to place the percentage of ITN on the x axis and incidence of Malaria on the y axis. Using geom_point(), I was able to distinguish the different countries by color. From the graph, there seems to be a very small positive correlation between the variables. In some countries, although there was a higher percentage of households with ITN there was also higher incidence of Malaria.
+
+```{r}
+ggplot(top4, aes(x =Entity, y = `ITN`, fill = Entity)) + 
+    geom_bar(stat = "summary", fun = mean) + scale_fill_brewer() + labs(x = "Country", 
+    y = "Percentage of Households with ITN", title = "% of Households with ITN in Four Top Countries ") + geom_errorbar(stat = "summary", width = 0.5) + theme(legend.text = element_text(size = 6)) 
+```
+The graph above shows the percentage of ITN in the top four countries. I used ggplot to plot the countries on the x-axis and the percentage of ITN on the y axis. I used geom_bar() to plot the mean incidence of Malaria for each country if it was accounted for. I distinguished each country by color and labeled my axes accordingly.
+
+I noted that Nigeria, which according to WHO is the world's leader in the number of deaths (23%) due to Malaria, had very low percentage of households with ITN. 
+
+### Part 5 - Performing k-means/clustering - Dimensionality Reductions
+```{r}
+library(cluster)
+mal <- vector()
+for (i in 1:4) {
+    mals <- malaria_data %>% dplyr::select(Deaths, `Malaria cases/100,000`, `ITN`,`Government Expenditure`) %>% 
+        kmeans(., i)
+    mal[i] <- mals$tot.withinss
+}
+ggplot() + geom_point(aes(x = 1:4, y = mal)) + geom_path(aes(x = 1:4, 
+    y = mal)) + xlab("clusters") + scale_x_continuous(breaks = 1:4)
+
+```
+```{r}
+ml <- malaria_data %>% select_if(is.numeric) %>% na.omit()
+kmeans <- ml %>% scale %>% kmeans(4)
+kclust <- ml %>% mutate(cluster = as.factor(kmeans$cluster))
+kclust %>% ggplot(aes(`ITN`, `Malaria cases/100,000`, color = cluster)) + geom_point()
+
+```
+```{r}
+ml
+kclust %>% mutate(gov_spending = ml$`Government Expenditure`) %>% ggplot(aes(`Malaria cases/100,000`, `ITN`, 
+    color = gov_spending, shape = cluster)) + geom_point(size = 3) + 
+    ggtitle("Cluster Plot using kmeans")
+
+```  
+I found that I needed 4 cluster since I have 4 numeric variables in my data set (Deaths, Incidence, % ITN, and Government Expenditure). I used kmeans to cluster my data and create the plots above. These plots show that none of my variables had that much in common, there is no correlation between my numeric variables.
+
+### Conclusion/Findings 
+From my data, I can conclude that there is not a relationship between the amount of money government spends, the percentage of households with ITN, and the incidence and death rate of Malaria. One reason that could contribute to why I was unable to see correlation between these variables is that the amount of government expenditures accounted for could be allocated to resources besides providing for ITN. Another reason could be if households that have ITN but their ITN has tears, therefore not protecting fully against mosquitoes. 
+
+As a Global Health student, I understand that there are many other societal and climate factors that contribute to the incidence and death rates of Malaria. If I were to revisit this project, I would be interested in looking into more variables that could contribute to the incidence rate of Malaria besides the four variables I focused on (including location, distance from body of water, humidty, global region etc.). 
+
+### References: 
+1. Number of malaria cases per 100,000 individuals. (n.d.). Retrieved April 04, 2021, from https://ourworldindata.org/grapher/number-of-malaria-cases-per-100000-individuals
+2. Households with at least ONE insecticide-treated bednet (itn) for sleeping (%). (n.d.). Retrieved April 04, 2021, from https://ourworldindata.org/grapher/households-with-at-least-one-itn
+3. Number of deaths from malaria. (n.d.). Retrieved April 04, 2021, from https://ourworldindata.org/grapher/malaria-deaths-ihme?tab=chart
+4. Government spending. (n.d.). Retrieved April 04, 2021, from https://ourworldindata.org/grapher/historical-gov-spending-gdp
+5. Fact sheet about malaria. (n.d.). Retrieved April 04, 2021, from https://www.who.int/news-room/fact-sheets/detail/malaria#:~:text=Disease%20burden&amp;text=In%202019%2C%20the%20region%20was%20home%20to%2094%25%20of%20all,Niger%20(4%25%20each).
+6. Roser, M., Ritchie, H., &amp; Ortiz-Ospina, E. (2013, May 09). World population growth. Retrieved April 04, 2021, from https://ourworldindata.org/world-population-growth
+
+
+
+<P style="page-break-before: always">
+\newpage
+    
+
+
+```{r eval=F}
+```
+...

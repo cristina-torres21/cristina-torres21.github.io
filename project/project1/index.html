@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Cristina Torres" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 1: Exploratory Data Analysis over Malaria</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1/">Project 1: Exploratory Data Analysis over Malaria</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="incidencedeath-rate-of-malaria-and-the-percentage-of-households-with-at-least-one-itn-for-sleeping-based-on-government-spending-from-2006-2011" class="section level1">
+<h1>Incidence/Death rate of Malaria and the Percentage of Households with at least one ITN for sleeping based on Government Spending from 2006-2011</h1>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>I am currently enrolled in a Global Health studies class and one disease that continues to be relevant in our discussion is the prevalence of Malaria. One thing that I was not aware of before this class is that families in underdeveloped worlds cover their households with nets, more specifically, Insecticide-treated bed nets (ITN). Provided through government spending, these nets have been shown to greatly reduce the number of malaria illness, severe disease, and death due to malaria.</p>
+<p>In this project, I would like to further understand the correlation between the percentage of households who have ITN and their incidence and death rates of Malaria. I have pulled data from “Our World in Data”. The three data sets are: “Number of Malaria cases per 100,000”, “Percentage of households with at least one ITN for sleeping”, and “Number of deaths from Malaria”.(<a href="https://ourworldindata.org/grapher/number-of-malaria-cases-per-100000-individuals" class="uri">https://ourworldindata.org/grapher/number-of-malaria-cases-per-100000-individuals</a>, <a href="https://ourworldindata.org/grapher/households-with-at-least-one-itn" class="uri">https://ourworldindata.org/grapher/households-with-at-least-one-itn</a> and <a href="https://ourworldindata.org/grapher/malaria-deaths-ihme?tab=chart" class="uri">https://ourworldindata.org/grapher/malaria-deaths-ihme?tab=chart</a>, respectively) The first data set lists the entity (country), code, year, and incidence of Malaria per 100,000. The second data set lists the entity, code, year and the percentage of households with at least one ITN for sleeping. The third data set lists the entity, code, year and the number of deaths.</p>
+<p>In addition, since many ITNs are provided through government spending, I would like to see if there is correlation in the amount of government spending with the incidence of Malaria and the rate of death due to Malaria. The data set,“Government Spending”, was also found through “Our World in Data” (<a href="https://ourworldindata.org/grapher/historical-gov-spending-gdp" class="uri">https://ourworldindata.org/grapher/historical-gov-spending-gdp</a>). This data set lists the entity, code, year, and the amount of government spending.</p>
+<p>I hypothesize that if government spends more money, the more amount of ITN available, and the lower the incidence and death from Malaria.</p>
+<div id="reading-in-the-four-data-sets" class="section level3">
+<h3>Reading in the four data sets:</h3>
+<pre class="r"><code>library(tidyverse)
+
+ITN &lt;- read_csv(&quot;households-with-at-least-one-itn.csv&quot;)
+glimpse(ITN)</code></pre>
+<pre><code>## Rows: 78
+## Columns: 4
+## $ Entity                                                        &lt;chr&gt; &quot;Benin&quot;…
+## $ Code                                                          &lt;chr&gt; &quot;BEN&quot;, …
+## $ Year                                                          &lt;dbl&gt; 2006, 2…
+## $ `Indicator:Households with at least one ITN for sleeping (%)` &lt;dbl&gt; 24.5565…</code></pre>
+<pre class="r"><code>incidence &lt;- read_csv(&quot;number-of-malaria-cases-per-100000-individuals (1).csv&quot;)
+glimpse(incidence)</code></pre>
+<pre><code>## Rows: 879
+## Columns: 4
+## $ Entity                                &lt;chr&gt; &quot;Albania&quot;, &quot;Albania&quot;, &quot;Albania&quot;…
+## $ Code                                  &lt;chr&gt; &quot;ALB&quot;, &quot;ALB&quot;, &quot;ALB&quot;, &quot;ALB&quot;, &quot;DZ…
+## $ Year                                  &lt;dbl&gt; 2006, 2007, 2008, 2009, 2006, 2…
+## $ `Malaria cases/100,000 pop. - wef_cm` &lt;dbl&gt; 0.000000e+00, 0.000000e+00, 0.0…</code></pre>
+<pre class="r"><code>malaria_deaths &lt;- read_csv(&quot;malaria-deaths-ihme.csv&quot;)
+glimpse(malaria_deaths)</code></pre>
+<pre><code>## Rows: 6,468
+## Columns: 4
+## $ Entity &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;A…
+## $ Code   &lt;chr&gt; &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;,…
+## $ Year   &lt;dbl&gt; 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 20…
+## $ Deaths &lt;dbl&gt; 463.6124, 487.1916, 521.7142, 675.6577, 782.4453, 815.0452, 88…</code></pre>
+<pre class="r"><code>govt_spend &lt;- read_csv(&quot;historical-gov-spending-gdp.csv&quot;)
+glimpse(govt_spend)</code></pre>
+<pre><code>## Rows: 7,091
+## Columns: 4
+## $ Entity                                                      &lt;chr&gt; &quot;Afghanis…
+## $ Code                                                        &lt;chr&gt; &quot;AFG&quot;, &quot;A…
+## $ Year                                                        &lt;dbl&gt; 2003, 200…
+## $ `Government Expenditure (IMF based on Mauro et al. (2015))` &lt;dbl&gt; 14.06613,…</code></pre>
+</div>
+<div id="part-1---tidying-data" class="section level3">
+<h3>Part 1 - Tidying Data:</h3>
+<p>Since the data is already tidy, the following code blocks demonstrate the ability to untidy and retidy two out of the four data sets.</p>
+<p><em>Percentage of ITN in Households Data set:</em></p>
+<pre class="r"><code>glimpse(ITN)</code></pre>
+<pre><code>## Rows: 78
+## Columns: 4
+## $ Entity                                                        &lt;chr&gt; &quot;Benin&quot;…
+## $ Code                                                          &lt;chr&gt; &quot;BEN&quot;, …
+## $ Year                                                          &lt;dbl&gt; 2006, 2…
+## $ `Indicator:Households with at least one ITN for sleeping (%)` &lt;dbl&gt; 24.5565…</code></pre>
+<pre class="r"><code>ITN_untidy &lt;- ITN %&gt;% pivot_wider(names_from = &quot;Year&quot;, values_from = &quot;Entity&quot;)
+glimpse(ITN_untidy)</code></pre>
+<pre><code>## Rows: 78
+## Columns: 13
+## $ Code                                                          &lt;chr&gt; &quot;BEN&quot;, …
+## $ `Indicator:Households with at least one ITN for sleeping (%)` &lt;dbl&gt; 24.5565…
+## $ `2006`                                                        &lt;chr&gt; &quot;Benin&quot;…
+## $ `2011`                                                        &lt;chr&gt; NA, &quot;Be…
+## $ `2003`                                                        &lt;chr&gt; NA, NA,…
+## $ `2010`                                                        &lt;chr&gt; NA, NA,…
+## $ `2005`                                                        &lt;chr&gt; NA, NA,…
+## $ `2012`                                                        &lt;chr&gt; NA, NA,…
+## $ `2007`                                                        &lt;chr&gt; NA, NA,…
+## $ `2013`                                                        &lt;chr&gt; NA, NA,…
+## $ `2008`                                                        &lt;chr&gt; NA, NA,…
+## $ `2009`                                                        &lt;chr&gt; NA, NA,…
+## $ `2001`                                                        &lt;chr&gt; NA, NA,…</code></pre>
+<pre class="r"><code>ITN_retidy &lt;- ITN_untidy %&gt;% pivot_longer(cols = 3:13, names_to = &quot;Year&quot;, 
+    values_to = &quot;Entity&quot;) %&gt;% na.omit()
+glimpse(ITN_retidy)</code></pre>
+<pre><code>## Rows: 78
+## Columns: 4
+## $ Code                                                          &lt;chr&gt; &quot;BEN&quot;, …
+## $ `Indicator:Households with at least one ITN for sleeping (%)` &lt;dbl&gt; 24.5565…
+## $ Year                                                          &lt;chr&gt; &quot;2006&quot;,…
+## $ Entity                                                        &lt;chr&gt; &quot;Benin&quot;…</code></pre>
+<p><em>Incidence of Malaria per 100,000 Data set:</em></p>
+<pre class="r"><code>incidence</code></pre>
+<pre><code>## # A tibble: 879 x 4
+##    Entity  Code   Year `Malaria cases/100,000 pop. - wef_cm`
+##    &lt;chr&gt;   &lt;chr&gt; &lt;dbl&gt;                                 &lt;dbl&gt;
+##  1 Albania ALB    2006                                 0    
+##  2 Albania ALB    2007                                 0    
+##  3 Albania ALB    2008                                 0    
+##  4 Albania ALB    2009                                 0    
+##  5 Algeria DZA    2006                                 0.978
+##  6 Algeria DZA    2007                                 0.978
+##  7 Algeria DZA    2008                                 0.978
+##  8 Algeria DZA    2009                                 0    
+##  9 Algeria DZA    2010                                 0    
+## 10 Algeria DZA    2011                                 0    
+## # … with 869 more rows</code></pre>
+<pre class="r"><code>incidence_untidy &lt;- incidence %&gt;% pivot_wider(names_from = &quot;Code&quot;, 
+    values_from = &quot;Malaria cases/100,000 pop. - wef_cm&quot;)
+incidence_untidy</code></pre>
+<pre><code>## # A tibble: 879 x 146
+##    Entity  Year   ALB    DZA   AGO   ARG   ARM   AUS   AUT   AZE   BHR   BGD
+##    &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 Alban…  2006     0 NA        NA    NA    NA    NA    NA    NA    NA    NA
+##  2 Alban…  2007     0 NA        NA    NA    NA    NA    NA    NA    NA    NA
+##  3 Alban…  2008     0 NA        NA    NA    NA    NA    NA    NA    NA    NA
+##  4 Alban…  2009     0 NA        NA    NA    NA    NA    NA    NA    NA    NA
+##  5 Alger…  2006    NA  0.978    NA    NA    NA    NA    NA    NA    NA    NA
+##  6 Alger…  2007    NA  0.978    NA    NA    NA    NA    NA    NA    NA    NA
+##  7 Alger…  2008    NA  0.978    NA    NA    NA    NA    NA    NA    NA    NA
+##  8 Alger…  2009    NA  0        NA    NA    NA    NA    NA    NA    NA    NA
+##  9 Alger…  2010    NA  0        NA    NA    NA    NA    NA    NA    NA    NA
+## 10 Alger…  2011    NA  0        NA    NA    NA    NA    NA    NA    NA    NA
+## # … with 869 more rows, and 134 more variables: BRB &lt;dbl&gt;, BEL &lt;dbl&gt;,
+## #   BEN &lt;dbl&gt;, BTN &lt;dbl&gt;, BOL &lt;dbl&gt;, BIH &lt;dbl&gt;, BWA &lt;dbl&gt;, BRA &lt;dbl&gt;,
+## #   BRN &lt;dbl&gt;, BGR &lt;dbl&gt;, BFA &lt;dbl&gt;, BDI &lt;dbl&gt;, KHM &lt;dbl&gt;, CMR &lt;dbl&gt;,
+## #   CAN &lt;dbl&gt;, CPV &lt;dbl&gt;, TCD &lt;dbl&gt;, CHL &lt;dbl&gt;, CHN &lt;dbl&gt;, COL &lt;dbl&gt;,
+## #   CRI &lt;dbl&gt;, CIV &lt;dbl&gt;, HRV &lt;dbl&gt;, CYP &lt;dbl&gt;, CZE &lt;dbl&gt;, DNK &lt;dbl&gt;,
+## #   DOM &lt;dbl&gt;, ECU &lt;dbl&gt;, EGY &lt;dbl&gt;, SLV &lt;dbl&gt;, EST &lt;dbl&gt;, SWZ &lt;dbl&gt;,
+## #   ETH &lt;dbl&gt;, FIN &lt;dbl&gt;, FRA &lt;dbl&gt;, GAB &lt;dbl&gt;, GMB &lt;dbl&gt;, GEO &lt;dbl&gt;,
+## #   DEU &lt;dbl&gt;, GHA &lt;dbl&gt;, GRC &lt;dbl&gt;, GTM &lt;dbl&gt;, GIN &lt;dbl&gt;, GUY &lt;dbl&gt;,
+## #   HTI &lt;dbl&gt;, HND &lt;dbl&gt;, HUN &lt;dbl&gt;, ISL &lt;dbl&gt;, IND &lt;dbl&gt;, IDN &lt;dbl&gt;,
+## #   IRN &lt;dbl&gt;, IRL &lt;dbl&gt;, ISR &lt;dbl&gt;, ITA &lt;dbl&gt;, JAM &lt;dbl&gt;, JPN &lt;dbl&gt;,
+## #   JOR &lt;dbl&gt;, KAZ &lt;dbl&gt;, KEN &lt;dbl&gt;, `NA` &lt;dbl&gt;, KWT &lt;dbl&gt;, KGZ &lt;dbl&gt;,
+## #   LAO &lt;dbl&gt;, LVA &lt;dbl&gt;, LSO &lt;dbl&gt;, LBR &lt;dbl&gt;, LBY &lt;dbl&gt;, LTU &lt;dbl&gt;,
+## #   LUX &lt;dbl&gt;, MDG &lt;dbl&gt;, MWI &lt;dbl&gt;, MYS &lt;dbl&gt;, MLI &lt;dbl&gt;, MLT &lt;dbl&gt;,
+## #   MRT &lt;dbl&gt;, MUS &lt;dbl&gt;, MEX &lt;dbl&gt;, MNG &lt;dbl&gt;, MNE &lt;dbl&gt;, MAR &lt;dbl&gt;,
+## #   MOZ &lt;dbl&gt;, MMR &lt;dbl&gt;, NAM &lt;dbl&gt;, NPL &lt;dbl&gt;, NLD &lt;dbl&gt;, NZL &lt;dbl&gt;,
+## #   NIC &lt;dbl&gt;, NGA &lt;dbl&gt;, MKD &lt;dbl&gt;, NOR &lt;dbl&gt;, OMN &lt;dbl&gt;, PAK &lt;dbl&gt;,
+## #   PAN &lt;dbl&gt;, PRY &lt;dbl&gt;, PER &lt;dbl&gt;, PHL &lt;dbl&gt;, POL &lt;dbl&gt;, PRT &lt;dbl&gt;,
+## #   QAT &lt;dbl&gt;, ROU &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code>incidence_retidy &lt;- incidence_untidy %&gt;% pivot_longer(cols = 3:146, 
+    names_to = &quot;Code&quot;, values_to = &quot;Malaria cases per 100,000&quot;) %&gt;% 
+    na.omit()
+incidence_retidy</code></pre>
+<pre><code>## # A tibble: 879 x 4
+##    Entity   Year Code  `Malaria cases per 100,000`
+##    &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;                       &lt;dbl&gt;
+##  1 Albania  2006 ALB                         0    
+##  2 Albania  2007 ALB                         0    
+##  3 Albania  2008 ALB                         0    
+##  4 Albania  2009 ALB                         0    
+##  5 Algeria  2006 DZA                         0.978
+##  6 Algeria  2007 DZA                         0.978
+##  7 Algeria  2008 DZA                         0.978
+##  8 Algeria  2009 DZA                         0    
+##  9 Algeria  2010 DZA                         0    
+## 10 Algeria  2011 DZA                         0    
+## # … with 869 more rows</code></pre>
+</div>
+<div id="part-2---joining-data" class="section level3">
+<h3>Part 2 - Joining Data</h3>
+<p>Since the four datasets all have in common the Entity (country) and Code, I decided to use that as my commmon ID. I began with creating a dataset that shows the deaths and incidence of Malaria using full_join(). I began with this since I wanted to ensure that in any given year that there was reported for incidence of Malaria, there was also reported deaths from Malaria. Using na.omit(), I was able to omit any years for which the two data sets did not have in common or did not have both variables accounted for.</p>
+<pre class="r"><code># tidying/merging datasets
+death_incidence &lt;- malaria_deaths %&gt;% full_join(incidence) %&gt;% 
+    na.omit()
+death_incidence</code></pre>
+<pre><code>## # A tibble: 870 x 5
+##    Entity  Code   Year Deaths `Malaria cases/100,000 pop. - wef_cm`
+##    &lt;chr&gt;   &lt;chr&gt; &lt;dbl&gt;  &lt;dbl&gt;                                 &lt;dbl&gt;
+##  1 Albania ALB    2006   0                                    0    
+##  2 Albania ALB    2007   0                                    0    
+##  3 Albania ALB    2008   0                                    0    
+##  4 Albania ALB    2009   0                                    0    
+##  5 Algeria DZA    2006   7.21                                 0.978
+##  6 Algeria DZA    2007   7.30                                 0.978
+##  7 Algeria DZA    2008   7.00                                 0.978
+##  8 Algeria DZA    2009   6.81                                 0    
+##  9 Algeria DZA    2010   6.30                                 0    
+## 10 Algeria DZA    2011   6.12                                 0    
+## # … with 860 more rows</code></pre>
+<p>Next, I determined in which observations was there ITN reported for that same year using right_join(). I used right_join in this dataset since I wanted to add the percentage of ITN noted for each year and the incidence and death rates that correlated to the percentage of ITN.</p>
+<pre class="r"><code>ITN_DI &lt;- death_incidence %&gt;% right_join(ITN) %&gt;% na.omit()
+glimpse(ITN_DI)</code></pre>
+<pre><code>## Rows: 42
+## Columns: 6
+## $ Entity                                                        &lt;chr&gt; &quot;Benin&quot;…
+## $ Code                                                          &lt;chr&gt; &quot;BEN&quot;, …
+## $ Year                                                          &lt;dbl&gt; 2006, 2…
+## $ Deaths                                                        &lt;dbl&gt; 1.11569…
+## $ `Malaria cases/100,000 pop. - wef_cm`                         &lt;dbl&gt; 12172.5…
+## $ `Indicator:Households with at least one ITN for sleeping (%)` &lt;dbl&gt; 24.5565…</code></pre>
+<p>Finally I joined all four data sets by left_join() with the governemnt expenditures data set so I could see which observations there was government spending. The final data set (malaria_full) shows the incidence per 100,000 and the number of deaths from Malaria when there is ITN and Government spending present. As previously mentioned, I used na.omit() to omit any observation wherein the four variables (incidence, death, ITN, and government spending) were missing a value, as well as to omit the years in which no values were observed for all four variables. (It should also be noted that after joining these datasets I was left with the range of years from 2006-2011)</p>
+<pre class="r"><code>malaria_full &lt;- ITN_DI %&gt;% left_join(govt_spend) %&gt;% na.omit()
+glimpse(malaria_full)</code></pre>
+<pre><code>## Rows: 31
+## Columns: 7
+## $ Entity                                                        &lt;chr&gt; &quot;Benin&quot;…
+## $ Code                                                          &lt;chr&gt; &quot;BEN&quot;, …
+## $ Year                                                          &lt;dbl&gt; 2006, 2…
+## $ Deaths                                                        &lt;dbl&gt; 1.11569…
+## $ `Malaria cases/100,000 pop. - wef_cm`                         &lt;dbl&gt; 12172.5…
+## $ `Indicator:Households with at least one ITN for sleeping (%)` &lt;dbl&gt; 24.5565…
+## $ `Government Expenditure (IMF based on Mauro et al. (2015))`   &lt;dbl&gt; 19.6458…</code></pre>
+<pre class="r"><code># renaming colums to make it easier to read
+malaria_full &lt;- malaria_full %&gt;% rename(`Government Expenditure` = &quot;Government Expenditure (IMF based on Mauro et al. (2015))&quot;)
+malaria_full &lt;- malaria_full %&gt;% rename(`% ITN` = &quot;Indicator:Households with at least one ITN for sleeping (%)&quot;)
+malaria_full &lt;- malaria_full %&gt;% rename(`Malaria cases/100,000` = &quot;Malaria cases/100,000 pop. - wef_cm&quot;)
+malaria_full &lt;- malaria_full %&gt;% rename(ITN = &quot;% ITN&quot;)</code></pre>
+</div>
+<div id="part-3---summary-statistics" class="section level3">
+<h3>Part 3 - Summary Statistics</h3>
+<p>Since the code of the country is not technically needed in my project, I decided to drop it by using select.</p>
+<pre class="r"><code>malaria_data &lt;- malaria_full %&gt;% select(-Code)</code></pre>
+<p>In addition, I wanted to determine out of the remaining 31 observations how many countries and years existed in my data set. Which was 24 countries and 6 different years.</p>
+<pre class="r"><code>malaria_data %&gt;% summarise(n_distinct(Entity))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `n_distinct(Entity)`
+##                  &lt;int&gt;
+## 1                   24</code></pre>
+<pre class="r"><code>malaria_data %&gt;% summarise(n_distinct(Year))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `n_distinct(Year)`
+##                &lt;int&gt;
+## 1                  6</code></pre>
+<p>After finding the distinct number of countries that existed in my data set, I decided to do some research to determine which countries accounted for most of the malaria cases and deaths.</p>
+<p>According to the World Health Organization, six countries account for approximately half of all malaria deaths worldwide: Nigeria, Congo, Tanzania, Burkina Faso, Mozambique and Niger, which are all located on the African continent</p>
+<p>Using filter(), I was able to see the observations in my data set that accounted for the countries that held the most deaths due to Malaria. I found that only 4 out of the top 6 were included in my data set. I named this new observation “top4”.</p>
+<pre class="r"><code>top4 &lt;- malaria_data %&gt;% filter(Entity %in% c(&quot;Nigeria&quot;, &quot;Congo&quot;, 
+    &quot;Tanzania&quot;, &quot;Burkina Faso&quot;, &quot;Mozambique&quot;, &quot;Niger&quot;))
+top4</code></pre>
+<pre><code>## # A tibble: 7 x 6
+##   Entity        Year  Deaths `Malaria cases/100,00…   ITN `Government Expenditu…
+##   &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt;                  &lt;dbl&gt; &lt;dbl&gt;                  &lt;dbl&gt;
+## 1 Burkina Faso  2006  34345.                 11894. 24.2                    25.2
+## 2 Burkina Faso  2010  38503.                 43366. 56.9                    25.4
+## 3 Mozambique    2011  24331.                 35441. 51.4                    35.3
+## 4 Nigeria       2007 237151.                  2104.  4.05                   26.3
+## 5 Nigeria       2008 241186.                  2027.  7.98                   26.7
+## 6 Nigeria       2011 206468.                 39736. 40.8                    30.6
+## 7 Tanzania      2010  18817.                 29245. 63.8                    28.4</code></pre>
+<p>Since I am looking for correlation between the number of cases and the number of deaths of Malaria based on the amount of ITN and government spending, I wanted to determine the percentage of households with ITN and the amount of money government spent.</p>
+<p>After accounting for the top four countries that were included in my data, I arranged these countries based on descending percentage of household with ITN to look at the incidence and deaths due to Malaria. Then I arranged these countries based on ascending government expenditures. I noted that after these arrangements I did not see much correlation between my variables within the top four countries.</p>
+<pre class="r"><code>top4 %&gt;% arrange(-ITN)</code></pre>
+<pre><code>## # A tibble: 7 x 6
+##   Entity        Year  Deaths `Malaria cases/100,00…   ITN `Government Expenditu…
+##   &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt;                  &lt;dbl&gt; &lt;dbl&gt;                  &lt;dbl&gt;
+## 1 Tanzania      2010  18817.                 29245. 63.8                    28.4
+## 2 Burkina Faso  2010  38503.                 43366. 56.9                    25.4
+## 3 Mozambique    2011  24331.                 35441. 51.4                    35.3
+## 4 Nigeria       2011 206468.                 39736. 40.8                    30.6
+## 5 Burkina Faso  2006  34345.                 11894. 24.2                    25.2
+## 6 Nigeria       2008 241186.                  2027.  7.98                   26.7
+## 7 Nigeria       2007 237151.                  2104.  4.05                   26.3</code></pre>
+<pre class="r"><code>top4 %&gt;% arrange(`Government Expenditure`)</code></pre>
+<pre><code>## # A tibble: 7 x 6
+##   Entity        Year  Deaths `Malaria cases/100,00…   ITN `Government Expenditu…
+##   &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt;                  &lt;dbl&gt; &lt;dbl&gt;                  &lt;dbl&gt;
+## 1 Burkina Faso  2006  34345.                 11894. 24.2                    25.2
+## 2 Burkina Faso  2010  38503.                 43366. 56.9                    25.4
+## 3 Nigeria       2007 237151.                  2104.  4.05                   26.3
+## 4 Nigeria       2008 241186.                  2027.  7.98                   26.7
+## 5 Tanzania      2010  18817.                 29245. 63.8                    28.4
+## 6 Nigeria       2011 206468.                 39736. 40.8                    30.6
+## 7 Mozambique    2011  24331.                 35441. 51.4                    35.3</code></pre>
+<p>I did the same process for the my full data set, and did not see much correlation between the amount of government expenditures and percentage of ITN and the rate of Malaria incidence/death.</p>
+<pre class="r"><code>malaria_data %&gt;% arrange(-ITN)</code></pre>
+<pre><code>## # A tibble: 31 x 6
+##    Entity        Year Deaths `Malaria cases/100,00…   ITN `Government Expenditu…
+##    &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;                  &lt;dbl&gt; &lt;dbl&gt;                  &lt;dbl&gt;
+##  1 Rwanda        2010  2243.                 34352.  82.0                   26.7
+##  2 Benin         2011  9768.                 36976.  79.8                   22.0
+##  3 Cote d&#39;Ivoi…  2011 30031.                 37162.  67.3                   28.5
+##  4 Tanzania      2010 18817.                 29245.  63.8                   28.4
+##  5 Senegal       2010  4814.                 12063.  62.9                   28.1
+##  6 Uganda        2011 28153.                 35543.  59.8                   21.7
+##  7 Madagascar    2008  8820.                 11674.  57.0                   19.4
+##  8 Burkina Faso  2010 38503.                 43366.  56.9                   25.4
+##  9 Malawi        2010  8334.                 33363.  56.8                   40.3
+## 10 Kenya         2008  8258.                   388.  55.7                   29.6
+## # … with 21 more rows</code></pre>
+<pre class="r"><code>malaria_data %&gt;% arrange(`Government Expenditure`)</code></pre>
+<pre><code>## # A tibble: 31 x 6
+##    Entity       Year  Deaths `Malaria cases/100,0…    ITN `Government Expenditu…
+##    &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;                 &lt;dbl&gt;  &lt;dbl&gt;                  &lt;dbl&gt;
+##  1 Madagascar   2008  8820.                11674.  57.0                     19.4
+##  2 Benin        2006 11157.                12173.  24.6                     19.6
+##  3 Uganda       2006 50080.                47843.  15.9                     20.4
+##  4 Pakistan     2006  5280.                   81.5  0.755                   21.5
+##  5 Uganda       2011 28153.                35543.  59.8                     21.7
+##  6 Zimbabwe     2009   860.                20567.  27.8                     21.9
+##  7 Benin        2011  9768.                36976.  79.8                     22.0
+##  8 Cameroon     2011 23451.                28013.  36.4                     22.0
+##  9 Tajikistan   2006    14.6                  87.5  2.00                    22.4
+## 10 Burkina Fa…  2006 34345.                11894.  24.2                     25.2
+## # … with 21 more rows</code></pre>
+<p>After trying to see if I could find any correlation between my variables, I decided to
+determine the overall average number of deaths and incidence per 100,000 in each year included in my data set.</p>
+<p>I grouped the malaria data set by year and summarized the average number of deaths and incidence. From this I saw that the greatest average of deaths due to Malaria were in 2007 and the greatest average of incidence per 100,000 was in 2011.</p>
+<p>With my hypothesis in mind, I wanted to see which year was when the government spent the least amount of money and the most amount of money (2009,2010). As well as which years had the lowest and highest percentage of ITN (2006, 2011).</p>
+<pre class="r"><code># one at a time
+malaria_data %&gt;% group_by(Entity, Year) %&gt;% summarise(mean_death = mean(Deaths)) %&gt;% 
+    arrange(mean_death)</code></pre>
+<pre><code>## # A tibble: 31 x 3
+## # Groups:   Entity [24]
+##    Entity      Year mean_death
+##    &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+##  1 Eswatini    2010       5.96
+##  2 Namibia     2006       9.37
+##  3 Tajikistan  2006      14.6 
+##  4 Mauritania  2007     343.  
+##  5 Zimbabwe    2010     836.  
+##  6 Zimbabwe    2009     860.  
+##  7 Rwanda      2010    2243.  
+##  8 Zambia      2007    4404.  
+##  9 Senegal     2010    4814.  
+## 10 Pakistan    2006    5280.  
+## # … with 21 more rows</code></pre>
+<pre class="r"><code>malaria_data %&gt;% group_by(Entity, Year) %&gt;% summarise(mean_incidence = mean(`Malaria cases/100,000`)) %&gt;% 
+    arrange(mean_incidence)</code></pre>
+<pre><code>## # A tibble: 31 x 3
+## # Groups:   Entity [24]
+##    Entity        Year mean_incidence
+##    &lt;chr&gt;        &lt;dbl&gt;          &lt;dbl&gt;
+##  1 Eswatini      2010           17.5
+##  2 Pakistan      2006           81.5
+##  3 Tajikistan    2006           87.5
+##  4 Kenya         2008          388. 
+##  5 Nigeria       2008         2027. 
+##  6 Nigeria       2007         2104. 
+##  7 Mauritania    2007         5979. 
+##  8 Mali          2006         6226. 
+##  9 Madagascar    2008        11674. 
+## 10 Burkina Faso  2006        11894. 
+## # … with 21 more rows</code></pre>
+<pre class="r"><code>malaria_data %&gt;% group_by(Entity, Year) %&gt;% summarise(mean_spent = mean(`Government Expenditure`)) %&gt;% 
+    arrange(mean_spent)</code></pre>
+<pre><code>## # A tibble: 31 x 3
+## # Groups:   Entity [24]
+##    Entity        Year mean_spent
+##    &lt;chr&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+##  1 Madagascar    2008       19.4
+##  2 Benin         2006       19.6
+##  3 Uganda        2006       20.4
+##  4 Pakistan      2006       21.5
+##  5 Uganda        2011       21.7
+##  6 Zimbabwe      2009       21.9
+##  7 Benin         2011       22.0
+##  8 Cameroon      2011       22.0
+##  9 Tajikistan    2006       22.4
+## 10 Burkina Faso  2006       25.2
+## # … with 21 more rows</code></pre>
+<pre class="r"><code>malaria_data %&gt;% group_by(Entity, Year) %&gt;% summarise(mean_nets = mean(ITN)) %&gt;% 
+    arrange(mean_nets)</code></pre>
+<pre><code>## # A tibble: 31 x 3
+## # Groups:   Entity [24]
+##    Entity        Year mean_nets
+##    &lt;chr&gt;        &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Pakistan      2006     0.755
+##  2 Tajikistan    2006     2.00 
+##  3 Nigeria       2007     4.05 
+##  4 Nigeria       2008     7.98 
+##  5 Mauritania    2007     8.04 
+##  6 Eswatini      2010     9.91 
+##  7 Uganda        2006    15.9  
+##  8 Namibia       2006    20.2  
+##  9 Burkina Faso  2006    24.2  
+## 10 Benin         2006    24.6  
+## # … with 21 more rows</code></pre>
+<pre class="r"><code># all together
+malaria_data %&gt;% group_by(Entity, Year) %&gt;% summarize_if(is.numeric, 
+    list(mean = mean), na.rm = T)</code></pre>
+<pre><code>## # A tibble: 31 x 6
+## # Groups:   Entity [24]
+##    Entity     Year Deaths_mean `Malaria cases/100… ITN_mean `Government Expendi…
+##    &lt;chr&gt;     &lt;dbl&gt;       &lt;dbl&gt;               &lt;dbl&gt;    &lt;dbl&gt;                &lt;dbl&gt;
+##  1 Benin      2006    11157.               12173.     24.6                  19.6
+##  2 Benin      2011     9768.               36976.     79.8                  22.0
+##  3 Burkina …  2006    34345.               11894.     24.2                  25.2
+##  4 Burkina …  2010    38503.               43366.     56.9                  25.4
+##  5 Burundi    2010     8493.               27785.     52.0                  41.5
+##  6 Cameroon   2011    23451.               28013.     36.4                  22.0
+##  7 Chad       2010    11262.               39920.     42.1                  31.2
+##  8 Cote d&#39;I…  2011    30031.               37162.     67.3                  28.5
+##  9 Eswatini   2010        5.96                17.5     9.91                 37.1
+## 10 Ghana      2008    31370.               16400.     41.7                  26.8
+## # … with 21 more rows</code></pre>
+<p>Next, I wanted to determine the Mortality rate of Malaria. I used the Mortality equation (Mortality = (# Deaths/ Total population)*100). In order to find the Mortality rate, I had to gather data that included the populations of my observations.</p>
+<p>I used the population data set from “Our World in Data” (<a href="https://ourworldindata.org/world-population-growth" class="uri">https://ourworldindata.org/world-population-growth</a>). I used left_join() to only include the populations that were observed in my full malaria data set. Then using mutate(), I was able to create a new column that determined the Mortality rate for each of my observations. I named this finding “all_malaria”.</p>
+<p>I was also curious to see which country, during which year, had the largest Mortality rate so I used arrange() for the variable and discovered that Burkina Faso (one of the top six) had the largest Mortality rate, which was in 2006.</p>
+<pre class="r"><code># using mutate()
+global_pop &lt;- read_csv(&quot;population.csv&quot;)
+
+pop_malaria &lt;- malaria_data %&gt;% left_join(global_pop)
+
+all_malaria &lt;- pop_malaria %&gt;% mutate(Mortality = (Deaths/`Total population`) * 
+    100) %&gt;% select(-Code)
+
+all_malaria %&gt;% arrange(-Mortality)</code></pre>
+<pre><code>## # A tibble: 31 x 8
+##    Entity  Year Deaths `Malaria cases/…   ITN `Government Exp… `Total populati…
+##    &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;            &lt;dbl&gt; &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+##  1 Burki…  2006 3.43e4           11894. 24.2              25.2         13829000
+##  2 Burki…  2010 3.85e4           43366. 56.9              25.4         15605000
+##  3 Mali    2006 2.77e4            6226. 50.1              25.4         13203000
+##  4 Uganda  2006 5.01e4           47843. 15.9              20.4         28571000
+##  5 Niger…  2007 2.37e5            2104.  4.05             26.3        146340000
+##  6 Niger…  2008 2.41e5            2027.  7.98             26.7        150270000
+##  7 Cote …  2011 3.00e4           37162. 67.3              28.5         21029000
+##  8 Benin   2006 1.12e4           12173. 24.6              19.6          8217000
+##  9 Ghana   2008 3.14e4           16400. 41.7              26.8         23564000
+## 10 Niger…  2011 2.06e5           39736. 40.8              30.6        162804992
+## # … with 21 more rows, and 1 more variable: Mortality &lt;dbl&gt;</code></pre>
+<p>The following code chunk is the summary statistics for my numeric variables. I was able to determine the standard deviation, variance, quantiles, minimum and maximum.</p>
+<pre class="r"><code># standard devation -
+all_malaria %&gt;% group_by(Year) %&gt;% summarise_if(is.numeric, list(sd = sd), 
+    na.rm = T)</code></pre>
+<pre><code>## # A tibble: 6 x 7
+##    Year Deaths_sd `Malaria cases/… ITN_sd `Government Exp… `Total populati…
+##   &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;  &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1  2006    19345.           16669.   16.6             2.97        58020682.
+## 2  2007   135564.            8831.   27.4             3.08        80090608.
+## 3  2008   113032.            7683.   22.8             4.36        61845961.
+## 4  2009       NA               NA    NA              NA                 NA 
+## 5  2010    12075.           13827.   21.2             6.03        11933721.
+## 6  2011    69296.            3905.   15.2             5.21        53543949.
+## # … with 1 more variable: Mortality_sd &lt;dbl&gt;</code></pre>
+<pre class="r"><code># variance -
+all_malaria %&gt;% group_by(Year) %&gt;% summarise_if(is.numeric, list(var = var), 
+    na.rm = T)</code></pre>
+<pre><code>## # A tibble: 6 x 7
+##    Year Deaths_var `Malaria cases/… ITN_var `Government Exp… `Total populati…
+##   &lt;dbl&gt;      &lt;dbl&gt;            &lt;dbl&gt;   &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1  2006    3.74e 8       277869628.    275.             8.80          3.37e15
+## 2  2007    1.84e10        77982490.    749.             9.51          6.41e15
+## 3  2008    1.28e10        59034798.    522.            19.0           3.82e15
+## 4  2009   NA                    NA      NA             NA            NA      
+## 5  2010    1.46e 8       191177120.    449.            36.4           1.42e14
+## 6  2011    4.80e 9        15250349.    230.            27.1           2.87e15
+## # … with 1 more variable: Mortality_var &lt;dbl&gt;</code></pre>
+<pre class="r"><code># quantile -
+all_malaria %&gt;% summarize_if(is.numeric, list(Q1 = quantile), 
+    probs = 0.25, na.rm = T)</code></pre>
+<pre><code>## # A tibble: 1 x 7
+##   Year_Q1 Deaths_Q1 `Malaria cases/… ITN_Q1 `Government Exp… `Total populati…
+##     &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;  &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1    2007     4609.            8950.   22.2             22.2         10995500
+## # … with 1 more variable: Mortality_Q1 &lt;dbl&gt;</code></pre>
+<pre class="r"><code>all_malaria %&gt;% summarize_if(is.numeric, list(Q2 = quantile), 
+    probs = 0.5, na.rm = T)</code></pre>
+<pre><code>## # A tibble: 1 x 7
+##   Year_Q2 Deaths_Q2 `Malaria cases/… ITN_Q2 `Government Exp… `Total populati…
+##     &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;  &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1    2010    11157.           20567.   42.1             26.7         14540000
+## # … with 1 more variable: Mortality_Q2 &lt;dbl&gt;</code></pre>
+<pre class="r"><code>all_malaria %&gt;% summarize_if(is.numeric, list(Q3 = quantile), 
+    probs = 0.75, na.rm = T)</code></pre>
+<pre><code>## # A tibble: 1 x 7
+##   Year_Q3 Deaths_Q3 `Malaria cases/… ITN_Q3 `Government Exp… `Total populati…
+##     &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;  &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1    2010    29165.           34897.   56.9             29.9         26979500
+## # … with 1 more variable: Mortality_Q3 &lt;dbl&gt;</code></pre>
+<pre class="r"><code>all_malaria %&gt;% summarize_if(is.numeric, list(Q4 = quantile), 
+    probs = 1, na.rm = T)</code></pre>
+<pre><code>## # A tibble: 1 x 7
+##   Year_Q4 Deaths_Q4 `Malaria cases/… ITN_Q4 `Government Exp… `Total populati…
+##     &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;  &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1    2011   241186.           47843.   82.0             41.5        164023008
+## # … with 1 more variable: Mortality_Q4 &lt;dbl&gt;</code></pre>
+<pre class="r"><code># min &amp; max
+min_malaria &lt;- all_malaria %&gt;% summarize_if(is.numeric, list(min = min), 
+    na.rm = T)
+min_malaria %&gt;% pivot_longer(cols = 2:7, names_to = &quot;Statistic&quot;, 
+    values_to = &quot;Value&quot;)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   Year_min Statistic                    Value
+##      &lt;dbl&gt; &lt;chr&gt;                        &lt;dbl&gt;
+## 1     2006 Deaths_min                 5.96e+0
+## 2     2006 Malaria cases/100,000_min  1.75e+1
+## 3     2006 ITN_min                    7.55e-1
+## 4     2006 Government Expenditure_min 1.94e+1
+## 5     2006 Total population_min       1.06e+6
+## 6     2006 Mortality_min              2.11e-4</code></pre>
+<pre class="r"><code>max_malaria &lt;- all_malaria %&gt;% summarize_if(is.numeric, list(max = max), 
+    na.rm = T)
+max_malaria %&gt;% pivot_longer(cols = 2:7, names_to = &quot;Statistic&quot;, 
+    values_to = &quot;Value&quot;)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   Year_max Statistic                          Value
+##      &lt;dbl&gt; &lt;chr&gt;                              &lt;dbl&gt;
+## 1     2011 Deaths_max                    241186.   
+## 2     2011 Malaria cases/100,000_max      47843.   
+## 3     2011 ITN_max                           82.0  
+## 4     2011 Government Expenditure_max        41.5  
+## 5     2011 Total population_max       164023008    
+## 6     2011 Mortality_max                      0.248</code></pre>
+<p>After accounting for summary statistics, I determined the correlation between my numeric variables using `cor(use=“pair”)</p>
+<pre class="r"><code># cor -
+cor_malaria &lt;- malaria_data %&gt;% select(-Year) %&gt;% select_if(is.numeric) %&gt;% 
+    cor(use = &quot;pair&quot;)</code></pre>
+<p>From my correlation matrix, I saw that there was little correlation between my variables.</p>
+</div>
+<div id="part-4---data-visualizations-three-plots" class="section level3">
+<h3>Part 4 - Data Visualizations (three plots)</h3>
+<p>After looking at the numbers and statistics from my data set and seeing little correlation, I decided to make a correlation matrix as well as a heat map to better visualize the correlation, if any, between my numeric variables.</p>
+<pre class="r"><code>cor_malaria %&gt;% round(4)</code></pre>
+<pre><code>##                         Deaths Malaria cases/100,000     ITN
+## Deaths                  1.0000               -0.0811 -0.2950
+## Malaria cases/100,000  -0.0811                1.0000  0.5585
+## ITN                    -0.2950                0.5585  1.0000
+## Government Expenditure -0.0218                0.0835  0.1135
+##                        Government Expenditure
+## Deaths                                -0.0218
+## Malaria cases/100,000                  0.0835
+## ITN                                    0.1135
+## Government Expenditure                 1.0000</code></pre>
+<pre class="r"><code>cor_malaria %&gt;% as.data.frame()</code></pre>
+<pre><code>##                             Deaths Malaria cases/100,000        ITN
+## Deaths                  1.00000000           -0.08113375 -0.2949572
+## Malaria cases/100,000  -0.08113375            1.00000000  0.5585444
+## ITN                    -0.29495717            0.55854436  1.0000000
+## Government Expenditure -0.02176213            0.08345189  0.1134535
+##                        Government Expenditure
+## Deaths                            -0.02176213
+## Malaria cases/100,000              0.08345189
+## ITN                                0.11345347
+## Government Expenditure             1.00000000</code></pre>
+<pre class="r"><code>tidy_cor_malaria &lt;- cor_malaria %&gt;% as.data.frame() %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;% pivot_longer(-1, names_to = &quot;var2&quot;, values_to = &quot;correlation&quot;)
+tidy_cor_malaria</code></pre>
+<pre><code>## # A tibble: 16 x 3
+##    var1                   var2                   correlation
+##    &lt;chr&gt;                  &lt;chr&gt;                        &lt;dbl&gt;
+##  1 Deaths                 Deaths                      1     
+##  2 Deaths                 Malaria cases/100,000      -0.0811
+##  3 Deaths                 ITN                        -0.295 
+##  4 Deaths                 Government Expenditure     -0.0218
+##  5 Malaria cases/100,000  Deaths                     -0.0811
+##  6 Malaria cases/100,000  Malaria cases/100,000       1     
+##  7 Malaria cases/100,000  ITN                         0.559 
+##  8 Malaria cases/100,000  Government Expenditure      0.0835
+##  9 ITN                    Deaths                     -0.295 
+## 10 ITN                    Malaria cases/100,000       0.559 
+## 11 ITN                    ITN                         1     
+## 12 ITN                    Government Expenditure      0.113 
+## 13 Government Expenditure Deaths                     -0.0218
+## 14 Government Expenditure Malaria cases/100,000       0.0835
+## 15 Government Expenditure ITN                         0.113 
+## 16 Government Expenditure Government Expenditure      1</code></pre>
+<pre class="r"><code>tidy_cor_malaria %&gt;% ggplot(aes(var1, var2, fill = correlation)) + geom_tile()+
+scale_fill_gradient2(low=&quot;red&quot;,mid=&quot;white&quot;,high=&quot;blue&quot;)+ #makes colors!
+geom_text(aes(label=round(correlation,2)),color = &quot;black&quot;, size = 4)+ #overlays correlation values
+theme(axis.text.x = element_text(angle = 90, hjust = 1))+ #flips the x-axis labels
+coord_fixed()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" />
+The heat map shows little correlation between my variables in the large data set.</p>
+<pre class="r"><code>ggplot(malaria_data, aes(ITN, `Malaria cases/100,000`)) + geom_point(aes(color = Entity)) + 
+    labs(x = &quot;Percentage of Households with ITN&quot;, y = &quot;Incidence of Malaria per 100,000&quot;, 
+        title = &quot;Incidence of Malaria and % of ITN based on Country&quot;) + 
+    labs(colour = &quot;Country&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" />
+I graphed the relationship between incidence of malaria and the percentage of households with ITN based on respective Countries.</p>
+<p>I used ggplot() to place the percentage of ITN on the x axis and incidence of Malaria on the y axis. Using geom_point(), I was able to distinguish the different countries by color. From the graph, there seems to be a very small positive correlation between the variables. In some countries, although there was a higher percentage of households with ITN there was also higher incidence of Malaria.</p>
+<pre class="r"><code>ggplot(top4, aes(x = Entity, y = ITN, fill = Entity)) + geom_bar(stat = &quot;summary&quot;, 
+    fun = mean) + scale_fill_brewer() + labs(x = &quot;Country&quot;, y = &quot;Percentage of Households with ITN&quot;, 
+    title = &quot;% of Households with ITN in Four Top Countries &quot;) + 
+    geom_errorbar(stat = &quot;summary&quot;, width = 0.5) + theme(legend.text = element_text(size = 6))</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" />
+The graph above shows the percentage of ITN in the top four countries. I used ggplot to plot the countries on the x-axis and the percentage of ITN on the y axis. I used geom_bar() to plot the mean incidence of Malaria for each country if it was accounted for. I distinguished each country by color and labeled my axes accordingly.</p>
+<p>I noted that Nigeria, which according to WHO is the world’s leader in the number of deaths (23%) due to Malaria, had very low percentage of households with ITN.</p>
+</div>
+<div id="part-5---performing-k-meansclustering---dimensionality-reductions" class="section level3">
+<h3>Part 5 - Performing k-means/clustering - Dimensionality Reductions</h3>
+<pre class="r"><code>library(cluster)
+mal &lt;- vector()
+for (i in 1:4) {
+    mals &lt;- malaria_data %&gt;% dplyr::select(Deaths, `Malaria cases/100,000`, 
+        ITN, `Government Expenditure`) %&gt;% kmeans(., i)
+    mal[i] &lt;- mals$tot.withinss
+}
+ggplot() + geom_point(aes(x = 1:4, y = mal)) + geom_path(aes(x = 1:4, 
+    y = mal)) + xlab(&quot;clusters&quot;) + scale_x_continuous(breaks = 1:4)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ml &lt;- malaria_data %&gt;% select_if(is.numeric) %&gt;% na.omit()
+kmeans &lt;- ml %&gt;% scale %&gt;% kmeans(4)
+kclust &lt;- ml %&gt;% mutate(cluster = as.factor(kmeans$cluster))
+kclust %&gt;% ggplot(aes(ITN, `Malaria cases/100,000`, color = cluster)) + 
+    geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ml</code></pre>
+<pre><code>## # A tibble: 31 x 5
+##     Year   Deaths `Malaria cases/100,000`   ITN `Government Expenditure`
+##    &lt;dbl&gt;    &lt;dbl&gt;                   &lt;dbl&gt; &lt;dbl&gt;                    &lt;dbl&gt;
+##  1  2006 11157.                   12173.  24.6                      19.6
+##  2  2011  9768.                   36976.  79.8                      22.0
+##  3  2006 34345.                   11894.  24.2                      25.2
+##  4  2010 38503.                   43366.  56.9                      25.4
+##  5  2010  8493.                   27785.  52.0                      41.5
+##  6  2011 23451.                   28013.  36.4                      22.0
+##  7  2010 11262.                   39920.  42.1                      31.2
+##  8  2011 30031.                   37162.  67.3                      28.5
+##  9  2010     5.96                    17.5  9.91                     37.1
+## 10  2008 31370.                   16400.  41.7                      26.8
+## # … with 21 more rows</code></pre>
+<pre class="r"><code>kclust %&gt;% mutate(gov_spending = ml$`Government Expenditure`) %&gt;% 
+    ggplot(aes(`Malaria cases/100,000`, ITN, color = gov_spending, 
+        shape = cluster)) + geom_point(size = 3) + ggtitle(&quot;Cluster Plot using kmeans&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" />
+I found that I needed 4 cluster since I have 4 numeric variables in my data set (Deaths, Incidence, % ITN, and Government Expenditure). I used kmeans to cluster my data and create the plots above. These plots show that none of my variables had that much in common, there is no correlation between my numeric variables.</p>
+</div>
+<div id="conclusionfindings" class="section level3">
+<h3>Conclusion/Findings</h3>
+<p>From my data, I can conclude that there is not a relationship between the amount of money government spends, the percentage of households with ITN, and the incidence and death rate of Malaria. One reason that could contribute to why I was unable to see correlation between these variables is that the amount of government expenditures accounted for could be allocated to resources besides providing for ITN. Another reason could be if households that have ITN but their ITN has tears, therefore not protecting fully against mosquitoes.</p>
+<p>As a Global Health student, I understand that there are many other societal and climate factors that contribute to the incidence and death rates of Malaria. If I were to revisit this project, I would be interested in looking into more variables that could contribute to the incidence rate of Malaria besides the four variables I focused on (including location, distance from body of water, humidty, global region etc.).</p>
+</div>
+<div id="references" class="section level3">
+<h3>References:</h3>
+<ol style="list-style-type: decimal">
+<li>Number of malaria cases per 100,000 individuals. (n.d.). Retrieved April 04, 2021, from <a href="https://ourworldindata.org/grapher/number-of-malaria-cases-per-100000-individuals" class="uri">https://ourworldindata.org/grapher/number-of-malaria-cases-per-100000-individuals</a></li>
+<li>Households with at least ONE insecticide-treated bednet (itn) for sleeping (%). (n.d.). Retrieved April 04, 2021, from <a href="https://ourworldindata.org/grapher/households-with-at-least-one-itn" class="uri">https://ourworldindata.org/grapher/households-with-at-least-one-itn</a></li>
+<li>Number of deaths from malaria. (n.d.). Retrieved April 04, 2021, from <a href="https://ourworldindata.org/grapher/malaria-deaths-ihme?tab=chart" class="uri">https://ourworldindata.org/grapher/malaria-deaths-ihme?tab=chart</a></li>
+<li>Government spending. (n.d.). Retrieved April 04, 2021, from <a href="https://ourworldindata.org/grapher/historical-gov-spending-gdp" class="uri">https://ourworldindata.org/grapher/historical-gov-spending-gdp</a></li>
+<li>Fact sheet about malaria. (n.d.). Retrieved April 04, 2021, from <a href="https://www.who.int/news-room/fact-sheets/detail/malaria#" class="uri">https://www.who.int/news-room/fact-sheets/detail/malaria#</a>:~:text=Disease%20burden&amp;text=In%202019%2C%20the%20region%20was%20home%20to%2094%25%20of%20all,Niger%20(4%25%20each).</li>
+<li>Roser, M., Ritchie, H., &amp; Ortiz-Ospina, E. (2013, May 09). World population growth. Retrieved April 04, 2021, from <a href="https://ourworldindata.org/world-population-growth" class="uri">https://ourworldindata.org/world-population-growth</a></li>
+</ol>
+<P style="page-break-before: always">
+<div style="page-break-after: always;"></div>
+<p>…</p>
+</div>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

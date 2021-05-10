@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Cristina Torres" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 2: Modeling, Testing, and Predicting</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project2/">Project 2: Modeling, Testing, and Predicting</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<pre class="r"><code>class_diag &lt;- function(probs,truth){ 
+  #CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV 
+  if(is.character(truth)==TRUE) truth&lt;-as.factor(truth) 
+  if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1 
+  tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),factor(truth, levels=c(0,1))) 
+  acc=sum(diag(tab))/sum(tab) 
+  sens=tab[2,2]/colSums(tab)[2] 
+  spec=tab[1,1]/colSums(tab)[1] 
+  ppv=tab[2,2]/rowSums(tab)[2] 
+  
+#CALCULATE EXACT AUC 
+  ord&lt;-order(probs, decreasing=TRUE) 
+  probs &lt;- probs[ord]; truth &lt;- truth[ord] 
+  TPR=cumsum(truth)/max(1,sum(truth))  
+  FPR=cumsum(!truth)/max(1,sum(!truth)) 
+  dup &lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE) 
+  TPR &lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1) 
+  n &lt;- length(TPR) 
+  auc &lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n])) 
+  data.frame(acc,sens,spec,ppv,auc) 
+}</code></pre>
+<div id="modeling" class="section level1">
+<h1>Modeling</h1>
+<pre class="r"><code>library(mvtnorm)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(lmtest)
+library(glmnet)</code></pre>
+<div id="finding-data" class="section level2">
+<h2>Finding data:</h2>
+<p>This project looks at US Health Insurance. The data set used in this project “insurance” looks at the relationship between Insurance Premium Charges in US with important details for risk underwriting including: age, sex, BMI, Number of dependent children on insurance plan, and whether or not the individual who holds the account smokes. This data set was obtained from Kaggle, an online community of data scientists and machine learning practitioners, and can be found here : <a href="https://www.kaggle.com/teertha/ushealthinsurancedataset?select=insurance.csv" class="uri">https://www.kaggle.com/teertha/ushealthinsurancedataset?select=insurance.csv</a></p>
+<p>The insurance data set has 7 identifying variables and 1338 observations. The identifying variables include: age (18-64), sex (male or female), bmi (body mass index - ranging from 15.960 to 53.130), children (number of dependents), smoker (yes or no), region (residential area of the beneficiary) and charges (individual medical costs billed by the health insurance).</p>
+<p>Since smoking is one of the main contributors to other health related diseases I would like to focus on its effects in this data set.</p>
+<p>Side note: According to CDC, BMI is a measure of a person’s weight in kilograms divided by the square of height in meters. BMI is often used to screen for weight categories that <em>may</em> lead to health problems. A BMI greater than 25 is considered overweight and a BMI greater than 30 is considered obese.</p>
+<pre class="r"><code>insurance &lt;- read_csv(&quot;insurance.csv&quot;)
+head(insurance)</code></pre>
+<pre><code>## # A tibble: 6 x 7
+##     age sex      bmi children smoker region    charges
+##   &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;
+## 1    19 female  27.9        0 yes    southwest  16885.
+## 2    18 male    33.8        1 no     southeast   1726.
+## 3    28 male    33          3 no     southeast   4449.
+## 4    33 male    22.7        0 no     northwest  21984.
+## 5    32 male    28.9        0 no     northwest   3867.
+## 6    31 female  25.7        0 no     southeast   3757.</code></pre>
+<pre class="r"><code>insurance %&gt;% na.omit()</code></pre>
+<pre><code>## # A tibble: 1,338 x 7
+##      age sex      bmi children smoker region    charges
+##    &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;       &lt;dbl&gt;
+##  1    19 female  27.9        0 yes    southwest  16885.
+##  2    18 male    33.8        1 no     southeast   1726.
+##  3    28 male    33          3 no     southeast   4449.
+##  4    33 male    22.7        0 no     northwest  21984.
+##  5    32 male    28.9        0 no     northwest   3867.
+##  6    31 female  25.7        0 no     southeast   3757.
+##  7    46 female  33.4        1 no     southeast   8241.
+##  8    37 female  27.7        3 no     northwest   7282.
+##  9    37 male    29.8        2 no     northeast   6406.
+## 10    60 female  25.8        0 no     northwest  28923.
+## # … with 1,328 more rows</code></pre>
+<pre class="r"><code>#creating a dicotomous outcome $y$ for variable &quot;smoker&quot; where response &#39;yes&#39;=1 and &#39;no&#39;=0
+insurance&lt;-insurance%&gt;%mutate(y=ifelse(smoker==&quot;yes&quot;,1,0))
+insurance</code></pre>
+<pre><code>## # A tibble: 1,338 x 8
+## age sex bmi children smoker region charges y
+## &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 19 female 27.9 0 yes southwest 16885.  1
+## 2 18 male 33.8 1 no southeast 1726.  0
+## 3 28 male 33 3 no southeast 4449.  0
+## 4 33 male 22.7 0 no northwest 21984.  0
+## 5 32 male 28.9 0 no northwest 3867.  0
+## 6 31 female 25.7 0 no southeast 3757.  0
+## 7 46 female 33.4 1 no southeast 8241.  0
+## 8 37 female 27.7 3 no northwest 7282.  0
+## 9 37 male 29.8 2 no northeast 6406.  0
+## 10 60 female 25.8 0 no northwest 28923.  0
+## # … with 1,328 more rows</code></pre>
+</div>
+<div id="manova-test" class="section level2">
+<h2>MANOVA Test</h2>
+<p>To begin this project I ran a MANOVA test on my variables.</p>
+<pre class="r"><code>#manova 
+manova_ins &lt;- manova(cbind(age, bmi, children, charges) ~ smoker, data = insurance)
+summary(manova_ins)</code></pre>
+<pre><code>## Df Pillai approx F num Df den Df Pr(&gt;F)
+## smoker 1 0.71574 839.1 4 1333 &lt; 2.2e-16 ***
+## Residuals 1336
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>#univariate manova 
+summary.aov(manova_ins)</code></pre>
+<pre><code>## Response age :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## smoker 1 165 165.20 0.8368 0.3605
+## Residuals 1336 263760 197.43
+##
+## Response bmi :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## smoker 1 1 0.699 0.0188 0.891
+## Residuals 1336 49720 37.215
+##
+## Response children :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## smoker 1 0.11 0.11439 0.0787 0.7792
+## Residuals 1336 1942.83 1.45421
+##
+## Response charges :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## smoker 1 1.2152e+11 1.2152e+11 2177.6 &lt; 2.2e-16 ***
+## Residuals 1336 7.4554e+10 5.5804e+07
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>insurance %&gt;% group_by(smoker) %&gt;% summarize(mean(age), 
+    mean(bmi), mean(children), mean(charges))</code></pre>
+<pre><code>## # A tibble: 2 x 5
+## smoker `mean(age)` `mean(bmi)` `mean(children)`
+`mean(charges)`
+## &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 no 39.4 30.7 1.09 8434.
+## 2 yes 38.5 30.7 1.11 32050.</code></pre>
+<pre class="r"><code>#pairwise T test 
+pairwise.t.test(insurance$charges, insurance$smoker, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  insurance$charges and insurance$smoker 
+## 
+##     no    
+## yes &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<p>I used a one way MANOVA to test the effect of smoking on four numeric variables: age, bmi, children and charges. From the results of the MANOVA there was a significant difference reported for these variables: Pillai trace = 0.71574, pseudo F(1,1336) = 839.1, p&lt;0.0001.</p>
+<p>I also used a Univariate ANOVA following the MANOVA to determine the effect of each dependent variable. The Boneferi method was used for controlling Type one error rates. The univariate ANOVA for the numeric variable ‘charges’ was reported as significant: F(1,1336) = 2177.6, p&lt;0.0001.</p>
+<p>The Post-hoc Analysis was performed by a pairwise t-test.</p>
+<pre class="r"><code>#0.05/1 MANOVA + 2 ANOVA + 10 t-tests
+
+#probability of at least one type I error
+1 - 0.95^13</code></pre>
+<pre><code>## [1] 0.4866579</code></pre>
+<pre class="r"><code># Bonferroni Correction
+0.05/13</code></pre>
+<pre><code>## [1] 0.003846154</code></pre>
+<p>I performed 1 MANOVA, 2 ANOVAS, and 10 pairwise t-tests so I was able to calculate the bonferroni significant level, which was α=0.003846154. The probability of one at least one type one error is 0.4866579. The ‘charges’ numeric variable is still considered significant after finding bonferroni corrected significance level.</p>
+<pre class="r"><code>ggplot(insurance, aes(x=charges, y=bmi)) + geom_point(alpha = 0.5) + geom_density_2d(h=2) + coord_fixed() + facet_wrap(~smoker)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-6-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="randomization-test" class="section level2">
+<h2>Randomization Test</h2>
+<p>Next, I performed a randomization test on my model to determine the effect of my variables on the response of smoking.</p>
+<p>I first visualized the effects using ggplot:</p>
+<pre class="r"><code>ggplot(insurance,aes(charges,fill=smoker))+geom_histogram(bins=6.5)+
+facet_wrap(~smoker,ncol=2)+theme(legend.position=&quot;none&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>insurance %&gt;% group_by(smoker) %&gt;% summarize(means = mean(charges)) %&gt;% 
+    summarize(`mean_difference:` = diff(means)) %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 1
+## Columns: 1
+## $ `mean_difference:` &lt;dbl&gt; 23615.96</code></pre>
+<pre class="r"><code>rand_dist&lt;-vector()
+for(i in 1:5000){
+new&lt;-data.frame(charges=sample(insurance$charges),smoker=insurance$smoker)
+rand_dist[i]&lt;-mean(new[new$smoker==&quot;yes&quot;,]$charges)-
+mean(new[new$smoker==&quot;no&quot;,]$charges)}
+
+{hist(rand_dist,main=&quot;&quot;,ylab=&quot;&quot;); abline(v = c(-23615.96, 23615.96),col=&quot;red&quot;)}</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-8-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mean(rand_dist&gt;23615.96| rand_dist &lt; -23615.96) #pvalue: fail to reject H0!</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>In this model null hypothesis is that the true mean of health insurance charges is the same for non-smokers and smokers. The alternative hypothesis is the means of insurance charges for smokers and non-smokers differ.</p>
+<p>After I conducted an ANOVA/Fstat test, I found that the p-value for mean(Fs&gt;obs_F) was 0. This means none of our 5000 F stats generated under the null hypothesis were bigger than our actual F stat and means that the null hypothesis was rejected and that the two categories of smokers does have different charges for health insurance.</p>
+</div>
+<div id="linear-regression-model" class="section level2">
+<h2>Linear Regression Model</h2>
+<p>Next, I perfomed a linear regression model:</p>
+<pre class="r"><code>library(sandwich)
+library(lmtest)
+insurance$bmi_c &lt;- insurance$bmi - mean(insurance$bmi)
+fit3 &lt;- lm(charges ~ y * bmi_c, data = insurance)
+summary(fit3)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = charges ~ y * bmi_c, data = insurance)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -19768.0 -4400.7 -869.5 2957.7 31055.9
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 8435.24 188.87 44.661 &lt; 2e-16 ***
+## y 23548.63 417.37 56.421 &lt; 2e-16 ***
+## bmi_c 83.35 31.27 2.666 0.00778 **
+## y:bmi_c 1389.76 66.78 20.810 &lt; 2e-16 ***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 6161 on 1334 degrees of freedom
+## Multiple R-squared: 0.7418, Adjusted R-squared: 0.7412
+## F-statistic: 1277 on 3 and 1334 DF, p-value: &lt; 2.2e-16</code></pre>
+<p>In this portion of the project, I looked at linear regression model predicting evidence of smoking (<code>y</code>) from response variables BMI and charges with interactions. I first centered my response variable BMI.</p>
+<p>The model showed that the predicted charges for health insurance for individuals who are smokers with average bmi is 1389.76, and for smokers without average bmi the estimate is 23548.63.</p>
+<pre class="r"><code>ggplot(insurance, aes(bmi_c, charges, color = `y`)) + 
+    geom_smooth(method = &quot;lm&quot;, se = F, fullrange = T) + geom_point() + 
+    geom_vline(xintercept = 0, lty = 2)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>To determine the linearity, normality and homeskedacity of the model; I graphed the residuals to the fitted values. The plot showed that the linearity and homeskedacity were not good, which makes sense since the normality (ks.test) has a p-value less than 0.05 meaning that the data shows significant effects and the null hypothesis that the distribution is normal must be rejected.</p>
+<pre class="r"><code>#What proportion of the variation in the outcome does your model explain?
+summary(fit3)$r.sq</code></pre>
+<pre><code>## [1] 0.741771</code></pre>
+<pre class="r"><code>#linearity 
+resids3 &lt;- fit3$residuals
+fitvalues3 &lt;- fit3$fitted.values
+ggplot() + geom_point(aes(fitvalues3, resids3)) + geom_hline(yintercept = 0, 
+    col = &quot;red&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#Breush-Pagan Test 
+bptest(fit3)</code></pre>
+<pre><code>## 
+##  studentized Breusch-Pagan test
+## 
+## data:  fit3
+## BP = 6.9014, df = 3, p-value = 0.07511</code></pre>
+<pre class="r"><code>#One-sample Kolmogorov-Smirnov test
+ks.test(resids3, &quot;pnorm&quot;, sd = sd(resids3))</code></pre>
+<pre><code>## 
+##  One-sample Kolmogorov-Smirnov test
+## 
+## data:  resids3
+## D = 0.075177, p-value = 5.407e-07
+## alternative hypothesis: two-sided</code></pre>
+<pre class="r"><code>#T-test of coefficients
+summary(fit3)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = charges ~ y * bmi_c, data = insurance)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -19768.0 -4400.7 -869.5 2957.7 31055.9
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 8435.24 188.87 44.661 &lt; 2e-16 ***
+## y 23548.63 417.37 56.421 &lt; 2e-16 ***
+## bmi_c 83.35 31.27 2.666 0.00778 **
+## y:bmi_c 1389.76 66.78 20.810 &lt; 2e-16 ***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 6161 on 1334 degrees of freedom
+## Multiple R-squared: 0.7418, Adjusted R-squared: 0.7412
+## F-statistic: 1277 on 3 and 1334 DF, p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>coeftest(fit3, vcov = vcovHC(fit3))</code></pre>
+<pre><code>##
+## t test of coefficients:
+##
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 8435.235 183.360 46.0037 &lt; 2.2e-16 ***
+## y 23548.630 453.102 51.9721 &lt; 2.2e-16 ***
+## bmi_c 83.351 28.610 2.9134 0.003635 **
+## y:bmi_c 1389.756 78.604 17.6806 &lt; 2.2e-16 ***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<p>I then computed regression statistics/results with robust standard errors using “coeftest(…, vcov=vcovHC(…))”. The values are the same from with that of the original regression model therefore the interpretation of the coefficients still are valid. However a value that did change was for the significane value for average BMI. The significane response values remain less than 0.05 as they did in the original model however, for average bmi the signifance level changed from 0.00778 to 0.003635.</p>
+<p>The original model and the recomputed model, estimate for y:bmi_c is less than 0.05 and is significant.</p>
+<p>Finally, 0.741771 is the proportion of the variation in the outcome explained by the model.</p>
+</div>
+<div id="bootstrap-std.-error-linear-regression-with-bootstraps" class="section level2">
+<h2>Bootstrap Std. Error (Linear Regression with Bootstraps)</h2>
+<p>Next, I performed a linear regression with bootstraps:</p>
+<pre class="r"><code>fit3 &lt;- lm(charges ~ y * bmi_c, data = insurance)
+
+resids3 &lt;- fit3$residuals  #save residuals
+fitted3 &lt;- fit3$fitted.values  #save yhats
+resid_resamp &lt;- replicate(5000, {
+    new_resids &lt;- sample(resids3, replace = TRUE)  #resample resids w/ replacement
+    insurance$new_y &lt;- fitted3 + new_resids  #add new resids to yhats to get new &#39;data&#39;
+    fit_i &lt;- lm(new_y ~ y * bmi_c, data = insurance)  #refit model
+    coef(fit_i)  #save coefficient estimates (b0, b1, etc)
+})
+# standard deviation (the 0s)
+
+resid_resamp %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)       y    bmi_c  y:bmi_c
+## 1    188.3944 415.126 30.35908 66.60455</code></pre>
+<p>Comparing the original standard errors, robust errors, and boostrapped errors it appears they are all relatively the same — speaking more thoroughly however the bootstrapped errors for (Intercept), bechdel_binaryTRUE, runtime_c, and bechdel_binaryTRUE:runtime_c are, respectively, higher than the normal and robust, lower than robust, lower than normal, and higher than the normal and robust.</p>
+<pre class="r"><code># comparison
+coeftest(fit3)[, 1:2]  #not normal?</code></pre>
+<pre><code>##                Estimate Std. Error
+## (Intercept)  8435.23531  188.87079
+## y           23548.63007  417.37433
+## bmi_c          83.35056   31.26854
+## y:bmi_c      1389.75570   66.78297</code></pre>
+<pre class="r"><code>#Robust SES standard errors 
+coeftest(fit3, vcov = vcovHC(fit3))[, 1:2]  </code></pre>
+<pre><code>##                Estimate Std. Error
+## (Intercept)  8435.23531  183.36000
+## y           23548.63007  453.10158
+## bmi_c          83.35056   28.60982
+## y:bmi_c      1389.75570   78.60354</code></pre>
+<p>After comparing the orignal standard, roust and bootstrapped errors, I found that the bootstrapped errors are not quite similar, the bootstrapped errors are larger than the robust errors.</p>
+</div>
+<div id="logistic-regression-model" class="section level2">
+<h2>Logistic Regression Model</h2>
+<p>In this portion of the project, I predicted my dichotomous <code>y</code> variable (smoker vs non-smoker) from the variables sex, age and charges (without interaction).</p>
+<pre class="r"><code>glmfit &lt;- glm(y ~ sex + age + charges, data = insurance, 
+    family = &quot;binomial&quot;)
+coeftest(glmfit)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) -3.0466e+00 4.2173e-01 -7.2241 5.045e-13 ***
+## sexmale 1.9928e-01 2.5676e-01 0.7761 0.4377
+## age -8.6003e-02 1.0638e-02 -8.0848 6.228e-16 ***
+## charges 2.9471e-04 1.9252e-05 15.3078 &lt; 2.2e-16 ***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code># log-odds scale coefs
+coef(glmfit) %&gt;% round(5) %&gt;% data.frame</code></pre>
+<pre><code>##                    .
+## (Intercept) -3.04661
+## sexmale      0.19928
+## age         -0.08600
+## charges      0.00029</code></pre>
+<pre class="r"><code># odds scale coefs (multiplicative)
+coef(glmfit) %&gt;% exp %&gt;% round(5) %&gt;% data.frame</code></pre>
+<pre><code>##                   .
+## (Intercept) 0.04752
+## sexmale     1.22052
+## age         0.91759
+## charges     1.00029</code></pre>
+<p>The glm test shows that the predicted odds for an individual to be a smoker when the other variables are 0 is 0.04752. From the coefficients results, when the variables (age, sex, and charges) are held constant</p>
+<p>In examining the rating coefficients, it can be seen that sex when male multiplies odds by a factor 1.22052, age multiplies odds by a factor of 0.91759, and charges multiplies odds by a factor of 1.00029.</p>
+<p>Next, I ran a confusin matrix to determine the sensitivity(TPR), specificity (TNR), precision (PPV) and the AUC.</p>
+<pre class="r"><code># confusion matrix
+prob &lt;- predict(glmfit, type = &quot;response&quot;)  #save predicted probabilities
+pred &lt;- ifelse(prob &gt; 0.5, TRUE, FALSE)
+table(prediction = pred, truth = insurance$y) %&gt;% 
+    addmargins</code></pre>
+<pre><code>##           truth
+## prediction    0    1  Sum
+##      FALSE 1005   73 1078
+##      TRUE    59  201  260
+##      Sum   1064  274 1338</code></pre>
+<pre class="r"><code>#TPR
+201/274</code></pre>
+<pre><code>## [1] 0.7335766</code></pre>
+<pre class="r"><code>#TNR
+1005/1064</code></pre>
+<pre><code>## [1] 0.9445489</code></pre>
+<pre class="r"><code>#PPV
+201/260</code></pre>
+<pre><code>## [1] 0.7730769</code></pre>
+<p>The sensitivity for this dataset (probality of smoking) is 201/274 = 0.7335766. The specificity (probability of falsely detecting a non-smoker) is 1005/1064 = 0.9445489. The PPV for this dataset (the proportion of individuals who classify as smokers who actually are) is 201/260 = 0.7730769.</p>
+<p>The AUC, the measurement that measures how well the predicition is overall, was found by first creating a ROC plot then by running calc_auc on the ROC plot.</p>
+<pre class="r"><code># calculation of AUC (as stated to do in points 3 and 5 of
+# instruction #6) and creation of ROC plot
+library(plotROC)
+ROCplot &lt;- ggplot(insurance) + geom_roc(aes(d = y, 
+    m = prob), n.cuts = 0) + geom_segment(aes(x = 0, xend = 1, 
+    y = 0, yend = 1), lty = 2)
+ROCplot</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-17-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.9759189</code></pre>
+<p>From the results of the AUC test I saw that our data has a really good fit (AUC = 0.9759189). With this, I can conclude that the model has discrimination between smokers and non-smokers which is also supported by the logit plot (below).</p>
+<pre class="r"><code># logit plot
+insurance$logit &lt;- predict(glmfit, type = &quot;link&quot;)
+insurance %&gt;% ggplot(aes(logit, fill = smoker)) + 
+    geom_density(alpha = 0.4) + theme(legend.position = c(0.75, 
+    0.75)) + geom_vline(xintercept = 0) + xlab(&quot;predictor (logit)&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-18-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="logistic-regression-binary" class="section level2">
+<h2>Logistic Regression Binary</h2>
+<p>For the last portion of the project, I performed a logistic regression as previously completed but with measuring all response variables.</p>
+<pre class="r"><code>head(insurance)</code></pre>
+<pre><code>## # A tibble: 6 x 10
+## age sex bmi children smoker region charges y bmi_c logit
+## &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+&lt;dbl&gt;
+## 1 19 female 27.9 0 yes southwest 16885.  1 -2.76 0.295
+## 2 18 male 33.8 1 no southeast 1726.  0 3.11 -3.89
+## 3 28 male 33 3 no southeast 4449.  0 2.34 -3.94
+## 4 33 male 22.7 0 no northwest 21984.  0 -7.96 0.794
+## 5 32 male 28.9 0 no northwest 3867.  0 -1.78 -4.46
+## 6 31 female 25.7 0 no southeast 3757.  0 -4.92 -4.61</code></pre>
+<pre class="r"><code>ins &lt;- insurance %&gt;% select(-c(&quot;bmi_c&quot;, &quot;logit&quot;,&quot;smoker&quot;))
+fit8 &lt;- glm(y ~., data = ins, family = &quot;binomial&quot;)
+coeftest(fit8)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) 5.50343158 1.07308863 5.1286 2.919e-07 ***
+## age -0.10057901 0.01331266 -7.5551 4.184e-14 ***
+## sexmale 0.54784585 0.30179340 1.8153 0.06948 .
+## bmi -0.37077591 0.04622992 -8.0203 1.055e-15 ***
+## children -0.24393817 0.12779894 -1.9088 0.05629 .
+## regionnorthwest 0.14587682 0.39845914 0.3661 0.71429
+## regionsoutheast 0.64194450 0.42059154 1.5263 0.12694
+## regionsouthwest 0.31997422 0.43860613 0.7295 0.46568
+## charges 0.00039342 0.00003114 12.6337 &lt; 2.2e-16 ***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<pre class="r"><code>exp(coef(fit8))</code></pre>
+<pre><code>## (Intercept) age sexmale bmi children regionnorthwest
+## 245.5330551 0.9043137 1.7295233 0.6901986 0.7835361
+1.1570537
+## regionsoutheast regionsouthwest charges
+## 1.9001722 1.3770923 1.0003935</code></pre>
+<pre class="r"><code># confusion matrix
+probs2 &lt;- predict(fit8, type = &quot;response&quot;)
+class_diag(probs2, ins$y)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.9603886 0.9452555 0.9642857 0.8720539 0.9865094</code></pre>
+<pre class="r"><code>summary(fit8)</code></pre>
+<pre><code>##
+## Call:
+## glm(formula = y ~ ., family = &quot;binomial&quot;, data = ins)
+##
+## Deviance Residuals:
+## Min 1Q Median 3Q Max
+## -3.3000 -0.1014 -0.0388 -0.0084 1.3532
+##
+## Coefficients:
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) 5.503e+00 1.073e+00 5.129 2.92e-07 ***
+## age -1.006e-01 1.331e-02 -7.555 4.18e-14 ***
+## sexmale 5.478e-01 3.018e-01 1.815 0.0695 .
+## bmi -3.708e-01 4.623e-02 -8.020 1.06e-15 ***
+## children -2.439e-01 1.278e-01 -1.909 0.0563 .
+## regionnorthwest 1.459e-01 3.985e-01 0.366 0.7143
+## regionsoutheast 6.419e-01 4.206e-01 1.526 0.1269
+## regionsouthwest 3.200e-01 4.386e-01 0.730 0.4657
+## charges 3.934e-04 3.114e-05 12.634 &lt; 2e-16 ***
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## (Dispersion parameter for binomial family taken to be 1)
+##
+## Null deviance: 1356.63 on 1337 degrees of freedom
+## Residual deviance: 302.57 on 1329 degrees of freedom
+## AIC: 320.57
+##
+## Number of Fisher Scoring iterations: 8</code></pre>
+<p>The logistic regression using Binary variables had results as follows: acc= 0.9603886 which shows accurate predicting, sens= 0.9452555 , spec=0.9642857, ppv=0.8720539, and AUC=0.9865094. From these results I can conclude that the model is a great fit for the predicted probabilities of evidence of Smoking.</p>
+<p>Next I ran 10 fold CV model:</p>
+<pre class="r"><code>set.seed(348)
+k = 10
+data &lt;- ins[sample(nrow(ins)), ]
+folds &lt;- cut(seq(1:nrow(ins)), breaks = k, labels = F)
+
+diags &lt;- NULL
+for (i in 1:k) {
+    train &lt;- data[folds != i, ]
+    test &lt;- data[folds == i, ]
+    truth &lt;- test$y 
+    fit &lt;- glm(y~., data = train, family = &quot;binomial&quot;)
+    probs_2 &lt;- predict(fit, newdata = test, type = &quot;response&quot;)
+    diags &lt;- rbind(diags, class_diag(probs_2, truth))
+}
+
+summarize_all(diags, mean)</code></pre>
+<pre><code>##         acc     sens      spec       ppv       auc
+## 1 0.9574122 0.923697 0.9643122 0.8690135 0.9856555</code></pre>
+<p>The 10-fold CV model’s acc=0.9574122, sens=0.0.923697, spec=0.0.9643122, ppv=0.8690135, and AUC= 0.9856555. The AUC is still good and when compared to original logistic regression AUC remains relatively the same.</p>
+<p>Next I preformed LASSO and subsequently another 10-fold CV model on the findings from LASSO:</p>
+<pre class="r"><code>#Performing LASSO on the same model/variables. Choosing lambda to give the simplest model whose accuracy is near that of the best (i.e., `lambda.1se`). Discuss which variables are retained.
+
+# LASSO
+library(glmnet)
+I_matrix &lt;- as.matrix(ins$y)
+insurance_preds &lt;- model.matrix(y ~., data = ins)[, -1]
+
+
+
+insurance_cv &lt;- cv.glmnet(insurance_preds, I_matrix, family = &quot;binomial&quot;)
+lasso_fit &lt;- glmnet(insurance_preds, I_matrix, family = &quot;binomial&quot;, 
+    lambda = insurance_cv$lambda.1se)
+coef(lasso_fit)</code></pre>
+<pre><code>## 9 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                            s0
+## (Intercept)      2.5629071973
+## age             -0.0672485533
+## sexmale          0.1256564940
+## bmi             -0.2259411227
+## children        -0.0596691217
+## regionnorthwest  .           
+## regionsoutheast  0.0821620891
+## regionsouthwest  .           
+## charges          0.0002922594</code></pre>
+<pre class="r"><code>#Performing another 10-fold CV using only selected 
+set.seed(1234)
+k = 10
+
+data2 &lt;- ins %&gt;% sample_frac  #put rows of dataset in random order
+folds2 &lt;- ntile(1:nrow(data2), n = 10)  #create fold labels
+diags2 &lt;- NULL
+for (i in 1:k) {
+    ## Create training and test sets
+    train2 &lt;- data2[folds2 != i, ]
+    test2 &lt;- data2[folds2 == i, ]
+    truth2 &lt;- test2$y  ## Truth labels for fold i
+    glmfit2 &lt;- glm(y ~ age + sex + bmi + children + region + charges, 
+        data = ins, family = &quot;binomial&quot;)
+    probably &lt;- predict(glmfit2, newdata = test2, type = &quot;response&quot;)
+    ## Get diagnostics for fold i
+    diags2 &lt;- rbind(diags2, class_diag(probably, truth2))
+}
+
+diags2 %&gt;% summarize_all(mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.9604085 0.9471491 0.9644623 0.8752178 0.9872734</code></pre>
+<p>The variables retained from the LASSO were age, sex (male), bmi, children, region (southeast) and charges. The lasso regression cv showed acc=0.9604085, sens=0.9471491, spec=0.9644623 and ppv= 0.8752178. The AUC of the lasso regression is 0.9872734, which shows the this model is relatively the same but nevertheless greater when compared to past AUC, since it is now at the highest.</p>
+<p>The out-of-sample AUC of the 10-fold CV of the lasso variables selected is 0.9580952. When comparing the AUC to the logistic regression above it is higher but lower than lasso regression cv.</p>
+</div>
+<div id="findings" class="section level2">
+<h2>Findings</h2>
+<p>From this project I can conclude that the major variable that has an effect on the intensity of health insurance charges is for that of smokers. If an individual smokes, they are predicted to be charged more by insurance companies.</p>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

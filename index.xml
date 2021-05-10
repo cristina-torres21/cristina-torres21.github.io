@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>My Site</title>
+    <link>/</link>
+    <description>Recent content on My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 09 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Python Stuff</title>
+      <link>/post/2021/05/09/python-stuff/</link>
+      <pubDate>Sun, 09 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2021/05/09/python-stuff/</guid>
+      <description> Here’s my blog about Python:
+#insert code here </description>
+    </item>
+    
+    <item>
+      <title>Project 1: Exploratory Data Analysis over Malaria</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Incidence/Death rate of Malaria and the Percentage of Households with at least one ITN for sleeping based on Government Spending from 2006-2011 Introduction I am currently enrolled in a Global Health studies class and one disease that continues to be relevant in our discussion is the prevalence of Malaria. One thing that I was not aware of before this class is that families in underdeveloped worlds cover their households with nets, more specifically, Insecticide-treated bed nets (ITN).</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>class_diag &amp;lt;- function(probs,truth){ #CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV if(is.character(truth)==TRUE) truth&amp;lt;-as.factor(truth) if(is.numeric(truth)==FALSE &amp;amp; is.logical(truth)==FALSE) truth&amp;lt;-as.numeric(truth)-1 tab&amp;lt;-table(factor(probs&amp;gt;.5,levels=c(&amp;quot;FALSE&amp;quot;,&amp;quot;TRUE&amp;quot;)),factor(truth, levels=c(0,1))) acc=sum(diag(tab))/sum(tab) sens=tab[2,2]/colSums(tab)[2] spec=tab[1,1]/colSums(tab)[1] ppv=tab[2,2]/rowSums(tab)[2] #CALCULATE EXACT AUC ord&amp;lt;-order(probs, decreasing=TRUE) probs &amp;lt;- probs[ord]; truth &amp;lt;- truth[ord] TPR=cumsum(truth)/max(1,sum(truth)) FPR=cumsum(!truth)/max(1,sum(!truth)) dup &amp;lt;-c(probs[-1]&amp;gt;=probs[-length(probs)], FALSE) TPR &amp;lt;-c(0,TPR[!dup],1); FPR&amp;lt;-c(0,FPR[!dup],1) n &amp;lt;- length(TPR) auc &amp;lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n])) data.frame(acc,sens,spec,ppv,auc) } Modeling library(mvtnorm) library(ggplot2) library(dplyr) library(tidyverse) library(lmtest) library(glmnet) Finding data: This project looks at US Health Insurance. The data set used in this project “insurance” looks at the relationship between Insurance Premium Charges in US with important details for risk underwriting including: age, sex, BMI, Number of dependent children on insurance plan, and whether or not the individual who holds the account smokes.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/</guid>
+      <description> Check out some of my coding projects below:
+ Wrangling &amp;amp; Exploratory Data Analysis
+ Modeling, Inference, Prediction
+  -- </description>
+    </item>
+    
+    <item>
+      <title>Resume</title>
+      <link>/resume/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/resume/</guid>
+      <description>    </description>
+    </item>
+    
+  </channel>
+</rss>
