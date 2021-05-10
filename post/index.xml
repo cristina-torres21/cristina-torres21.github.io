@@ -14,7 +14,8 @@
       
       <guid>/post/2021/05/09/python-stuff/</guid>
       <description> Here’s my blog about Python:
-#insert code here </description>
+First here’s how R and Python interact with reticulate().
+#inserting code here UT &amp;lt;- &amp;quot;hook&amp;quot; library(reticulate) #PYTHON CHUNK y = &amp;quot;&amp;#39;em&amp;quot; print(r.UT,y) ## hook &amp;#39;em cat(c(UT,py$y)) ## hook &amp;#39;em </description>
     </item>
     
   </channel>

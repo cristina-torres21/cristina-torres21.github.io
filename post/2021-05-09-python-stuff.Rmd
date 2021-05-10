@@ -9,6 +9,20 @@ description: ''
 ---
 Here's my blog about Python:
 
+First here's how R and Python interact with reticulate().
+
 ```{r}
-#insert code here
+#inserting code here
+UT <- "hook"
+library(reticulate)
+```
+
+```{python}
+#PYTHON CHUNK
+y = "'em"
+print(r.UT,y)
+```
+
+```{R}
+cat(c(UT,py$y))
 ```

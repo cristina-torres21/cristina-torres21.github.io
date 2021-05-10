@@ -73,7 +73,16 @@
 
 
 <p>Here’s my blog about Python:</p>
-<pre class="r"><code>#insert code here</code></pre>
+<p>First here’s how R and Python interact with reticulate().</p>
+<pre class="r"><code>#inserting code here
+UT &lt;- &quot;hook&quot;
+library(reticulate)</code></pre>
+<pre class="python"><code>#PYTHON CHUNK
+y = &quot;&#39;em&quot;
+print(r.UT,y)</code></pre>
+<pre><code>## hook &#39;em</code></pre>
+<pre class="r"><code>cat(c(UT,py$y))</code></pre>
+<pre><code>## hook &#39;em</code></pre>
 
             
         <hr>         <div class="related-posts">
