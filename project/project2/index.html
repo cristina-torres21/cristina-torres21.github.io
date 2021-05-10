@@ -60,7 +60,7 @@
  
 <div class="blog-title">
           <h4>
-         January 1, 0001 
+         May 7, 2021 
             &nbsp;&nbsp;
             
           </h4>
@@ -361,8 +361,8 @@ resid_resamp &lt;- replicate(5000, {
 # standard deviation (the 0s)
 
 resid_resamp %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
-<pre><code>##   (Intercept)       y    bmi_c  y:bmi_c
-## 1    188.3944 415.126 30.35908 66.60455</code></pre>
+<pre><code>##   (Intercept)        y    bmi_c  y:bmi_c
+## 1    186.4877 419.0677 31.35934 66.76622</code></pre>
 <p>Comparing the original standard errors, robust errors, and boostrapped errors it appears they are all relatively the same — speaking more thoroughly however the bootstrapped errors for (Intercept), bechdel_binaryTRUE, runtime_c, and bechdel_binaryTRUE:runtime_c are, respectively, higher than the normal and robust, lower than robust, lower than normal, and higher than the normal and robust.</p>
 <pre class="r"><code># comparison
 coeftest(fit3)[, 1:2]  #not normal?</code></pre>
