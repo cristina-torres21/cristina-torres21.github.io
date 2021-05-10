@@ -5,11 +5,12 @@
     <link>/project/</link>
     <description>Recent content in Projects on My Site</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-US</language>
+    <lastBuildDate>Sun, 04 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Project 1: Exploratory Data Analysis over Malaria</title>
       <link>/project/project1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 04 Apr 2021 00:00:00 +0000</pubDate>
       
       <guid>/project/project1/</guid>
       <description>Incidence/Death rate of Malaria and the Percentage of Households with at least one ITN for sleeping based on Government Spending from 2006-2011 Introduction I am currently enrolled in a Global Health studies class and one disease that continues to be relevant in our discussion is the prevalence of Malaria. One thing that I was not aware of before this class is that families in underdeveloped worlds cover their households with nets, more specifically, Insecticide-treated bed nets (ITN).</description>
