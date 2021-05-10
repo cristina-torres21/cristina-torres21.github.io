@@ -13,9 +13,10 @@
       <pubDate>Sun, 09 May 2021 00:00:00 +0000</pubDate>
       
       <guid>/post/2021/05/09/python-stuff/</guid>
-      <description> Here’s my blog about Python:
+      <description>Here’s my blog about Python:
 First here’s how R and Python interact with reticulate().
-#inserting code here UT &amp;lt;- &amp;quot;hook&amp;quot; library(reticulate) #PYTHON CHUNK y = &amp;quot;&amp;#39;em&amp;quot; print(r.UT,y) ## hook &amp;#39;em cat(c(UT,py$y)) ## hook &amp;#39;em </description>
+#R CHUNK UT &amp;lt;- &amp;quot;hook&amp;quot; library(reticulate) #PYTHON CHUNK y = &amp;quot;&amp;#39;em&amp;quot; print(r.UT,y) ## hook &amp;#39;em #R again cat(c(UT,py$y)) ## hook &amp;#39;em Now, I will look at how to do Strings in Python for fun:
+&amp;#39;I am a Senior at UT&amp;#39; ## &amp;#39;I am a Senior at UT&amp;#39; &amp;#39;I&amp;#39; &amp;#39;am&amp;#39; &amp;#39;a&amp;#39; &amp;#39;Senior&amp;#39;&amp;#39;at&amp;#39; &amp;#39;UT&amp;#39; ## &amp;#39;IamaSenioratUT&amp;#39; &amp;#39;\&amp;#39;I am a Senior at UT\&amp;#39;&amp;#39; ## &amp;quot;&amp;#39;I am a Senior at UT&amp;#39;&amp;quot; or</description>
     </item>
     
     <item>

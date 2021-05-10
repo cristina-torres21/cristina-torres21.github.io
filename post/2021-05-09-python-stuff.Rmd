@@ -12,7 +12,7 @@ Here's my blog about Python:
 First here's how R and Python interact with reticulate().
 
 ```{r}
-#inserting code here
+#R CHUNK
 UT <- "hook"
 library(reticulate)
 ```
@@ -24,5 +24,58 @@ print(r.UT,y)
 ```
 
 ```{R}
+#R again
 cat(c(UT,py$y))
 ```
+
+Now, I will look at how to do Strings in Python for fun: 
+
+
+```{python}
+'I am a Senior at UT'
+'I' 'am' 'a' 'Senior''at' 'UT'
+'\'I am a Senior at UT\''
+```
+or 
+
+```{python}
+who = "I "
+what = "am a Senior"
+where = " at UT"
+
+who+what+where
+```
+
+More examples using String:
+
+My favorite movie is Lilo & Stitch, so I'm going to make a string with a collection of my favorite lines from the movie and replace punctuation marks with 'aloha'.
+```{python}
+import re
+strings=r"My name, Stitch. This is my family. I found it, all on my own. It's little, and broken, but still good. Yeah. Still good. My friends need to be punished. Also cute and fluffy! Nobody gets left behind. I like fluffy! Be carefull with the little angel!"
+
+re.sub("[.,!,']",'ALOHA', strings)
+```
+
+Spliting my favorite quotes from the movie:
+```{python}
+
+strings1=re.sub("[.,!']",' ALOHA', strings)
+re.split("\\s+", strings1)
+
+```
+
+"I like fluffy" ~ Stitch
+
+![](https://upload.wikimedia.org/wikipedia/en/d/d2/Stitch_%28Lilo_%26_Stitch%29.svg)
+
+
+
+
+
+
+
+
+
+
+
+
