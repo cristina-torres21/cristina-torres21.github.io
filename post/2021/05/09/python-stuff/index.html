@@ -72,8 +72,9 @@
               
 
 
-<p>Here’s my blog about Python:</p>
-<p>First here’s how R and Python interact with reticulate().</p>
+<p>In this course I learned some basic Python practices. This post shows some examples of code using R, Python, and R/Python interactions.</p>
+<div id="first-heres-how-r-and-python-interact-with-reticulate." class="section level2">
+<h2>First here’s how R and Python interact with reticulate().</h2>
 <pre class="r"><code>#R CHUNK
 UT &lt;- &quot;hook&quot;
 library(reticulate)</code></pre>
@@ -84,7 +85,10 @@ print(r.UT,y)</code></pre>
 <pre class="r"><code>#R again
 cat(c(UT,py$y))</code></pre>
 <pre><code>## hook &#39;em</code></pre>
-<p>Now, I will look at how to do Strings in Python for fun:</p>
+</div>
+<div id="now-i-will-look-at-how-to-do-strings-in-python-for-fun" class="section level2">
+<h2>Now, I will look at how to do Strings in Python for fun!</h2>
+<p>Here’s a simple string:</p>
 <pre class="python"><code>&#39;I am a Senior at UT&#39;</code></pre>
 <pre><code>## &#39;I am a Senior at UT&#39;</code></pre>
 <pre class="python"><code>&#39;I&#39; &#39;am&#39; &#39;a&#39; &#39;Senior&#39;&#39;at&#39; &#39;UT&#39;</code></pre>
@@ -98,7 +102,9 @@ where = &quot; at UT&quot;
 
 who+what+where</code></pre>
 <pre><code>## &#39;I am a Senior at UT&#39;</code></pre>
-<p>More examples using String:</p>
+</div>
+<div id="heres-another-example-of-using-string" class="section level2">
+<h2>Here’s another example of using String</h2>
 <p>My favorite movie is Lilo &amp; Stitch, so I’m going to make a string with a collection of my favorite lines from the movie and replace punctuation marks with ‘aloha’.</p>
 <pre class="python"><code>import re
 strings=r&quot;My name, Stitch. This is my family. I found it, all on my own. It&#39;s little, and broken, but still good. Yeah. Still good. My friends need to be punished. Also cute and fluffy! Nobody gets left behind. I like fluffy! Be carefull with the little angel!&quot;
@@ -110,8 +116,8 @@ re.sub(&quot;[.,!,&#39;]&quot;,&#39;ALOHA&#39;, strings)</code></pre>
 strings1=re.sub(&quot;[.,!&#39;]&quot;,&#39; ALOHA&#39;, strings)
 re.split(&quot;\\s+&quot;, strings1)</code></pre>
 <pre><code>## [&#39;My&#39;, &#39;name&#39;, &#39;ALOHA&#39;, &#39;Stitch&#39;, &#39;ALOHA&#39;, &#39;This&#39;, &#39;is&#39;, &#39;my&#39;, &#39;family&#39;, &#39;ALOHA&#39;, &#39;I&#39;, &#39;found&#39;, &#39;it&#39;, &#39;ALOHA&#39;, &#39;all&#39;, &#39;on&#39;, &#39;my&#39;, &#39;own&#39;, &#39;ALOHA&#39;, &#39;It&#39;, &#39;ALOHAs&#39;, &#39;little&#39;, &#39;ALOHA&#39;, &#39;and&#39;, &#39;broken&#39;, &#39;ALOHA&#39;, &#39;but&#39;, &#39;still&#39;, &#39;good&#39;, &#39;ALOHA&#39;, &#39;Yeah&#39;, &#39;ALOHA&#39;, &#39;Still&#39;, &#39;good&#39;, &#39;ALOHA&#39;, &#39;My&#39;, &#39;friends&#39;, &#39;need&#39;, &#39;to&#39;, &#39;be&#39;, &#39;punished&#39;, &#39;ALOHA&#39;, &#39;Also&#39;, &#39;cute&#39;, &#39;and&#39;, &#39;fluffy&#39;, &#39;ALOHA&#39;, &#39;Nobody&#39;, &#39;gets&#39;, &#39;left&#39;, &#39;behind&#39;, &#39;ALOHA&#39;, &#39;I&#39;, &#39;like&#39;, &#39;fluffy&#39;, &#39;ALOHA&#39;, &#39;Be&#39;, &#39;carefull&#39;, &#39;with&#39;, &#39;the&#39;, &#39;little&#39;, &#39;angel&#39;, &#39;ALOHA&#39;]</code></pre>
-<p>“I like fluffy” ~ Stitch</p>
 <p><img src="https://upload.wikimedia.org/wikipedia/en/d/d2/Stitch_%28Lilo_%26_Stitch%29.svg" /></p>
+</div>
 
             
         <hr>         <div class="related-posts">

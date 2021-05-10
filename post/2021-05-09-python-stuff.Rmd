@@ -7,10 +7,9 @@ categories: []
 tags: []
 description: ''
 ---
-Here's my blog about Python:
+In this course I learned some basic Python practices. This post shows some examples of code using R, Python, and R/Python interactions.
 
-First here's how R and Python interact with reticulate().
-
+## First here's how R and Python interact with reticulate().
 ```{r}
 #R CHUNK
 UT <- "hook"
@@ -28,16 +27,15 @@ print(r.UT,y)
 cat(c(UT,py$y))
 ```
 
-Now, I will look at how to do Strings in Python for fun: 
+## Now, I will look at how to do Strings in Python for fun! 
 
-
+Here's a simple string:
 ```{python}
 'I am a Senior at UT'
 'I' 'am' 'a' 'Senior''at' 'UT'
 '\'I am a Senior at UT\''
 ```
 or 
-
 ```{python}
 who = "I "
 what = "am a Senior"
@@ -46,7 +44,7 @@ where = " at UT"
 who+what+where
 ```
 
-More examples using String:
+## Here's another example of using String  
 
 My favorite movie is Lilo & Stitch, so I'm going to make a string with a collection of my favorite lines from the movie and replace punctuation marks with 'aloha'.
 ```{python}
@@ -63,8 +61,6 @@ strings1=re.sub("[.,!']",' ALOHA', strings)
 re.split("\\s+", strings1)
 
 ```
-
-"I like fluffy" ~ Stitch
 
 ![](https://upload.wikimedia.org/wikipedia/en/d/d2/Stitch_%28Lilo_%26_Stitch%29.svg)
 
